@@ -35,7 +35,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:+'
     compile 'com.android.support:appcompat-v7:+'
 
-    compile 'com.github.raxden:AndroidDB:v2.0.5@aar'
+    compile 'com.github.raxden:AndroidDB:v2.0.6@aar'
 }
 
 uploadArchives {
