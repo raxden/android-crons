@@ -1,13 +1,17 @@
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.raxdenstudios'
+version = '2.0.6'
 
 uploadArchives {
-    repositories.mavenDeployer {
-        pom.groupId = POM_GROUP_ID
-        pom.artifactId = POM_ARTIFACT_ID
-        pom.version = POM_VERSION
-        // Add other pom properties here if you want (developer details / licenses)
-        repository(url: REPOSITORY_PATH)
+    repositories {
+        mavenDeployer {
+            pom.groupId = group
+            pom.artifactId = rootProject.name
+            pom.version = version
+            repository(url: "file://${buildDir}/repo")
+        }
     }
 }
 
@@ -37,12 +41,11 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile 'com.google.android.gms:play-services:+'
     compile 'com.android.support:appcompat-v7:+'
 
-    compile 'com.github.raxden:AndroidCommons:+'
-    compile 'com.github.raxden:Androiddb:+'
+    compile 'com.github.raxden:android:v2.0.12'
+    compile 'com.github.raxden:Androiddb:v2.0.0'
 }
