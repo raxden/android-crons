@@ -1,2 +1,2 @@
-include ':library'
+include ':library', ':AndroidCommons', ':AndroidDB'
 rootProject.name = 'androidcrons'

@@ -28,15 +28,14 @@ android {
 }
 
 repositories {
-    maven { url "https://jitpack.io" }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
+    compile fileTree(include: '*.jar', dir: 'libs')
     compile 'com.google.android.gms:play-services:+'
     compile 'com.android.support:appcompat-v7:+'
-
-    compile 'com.github.raxden:androiddb:v2.1.0@aar'
+    compile project(':AndroidDB')
+    compile project(':AndroidCommons')
 }
 
 // build a jar with source files

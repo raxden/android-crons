@@ -10,6 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/AndroidCommons" />
+            <option value="$PROJECT_DIR$/AndroidDB" />
             <option value="$PROJECT_DIR$/library" />
           </set>
         </option>
