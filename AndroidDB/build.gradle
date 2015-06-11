@@ -1,2 +1,0 @@
-configurations.create("default")
-artifacts.add("default", file('androiddb-2.1.2.aar'))

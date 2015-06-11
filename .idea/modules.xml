@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AndroidCommons/AndroidCommons.iml" filepath="$PROJECT_DIR$/AndroidCommons/AndroidCommons.iml" />
-      <module fileurl="file://$PROJECT_DIR$/AndroidDB/AndroidDB.iml" filepath="$PROJECT_DIR$/AndroidDB/AndroidDB.iml" />
       <module fileurl="file://$PROJECT_DIR$/androidcrons.iml" filepath="$PROJECT_DIR$/androidcrons.iml" />
       <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
     </modules>
