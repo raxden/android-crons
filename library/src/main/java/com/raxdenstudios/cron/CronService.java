@@ -12,7 +12,6 @@ import android.util.Log;
 
 import com.raxdenstudios.cron.db.CronManager;
 import com.raxdenstudios.cron.db.CronOpenHelper;
-import com.raxdenstudios.cron.db.model.CronDBConstants;
 import com.raxdenstudios.cron.model.Cron;
 import com.raxdenstudios.db.DBManager;
 
@@ -36,9 +35,9 @@ public abstract class CronService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
     	super.onStartCommand(intent, flags, startId);
     	
-		if (intent != null && intent.getExtras() != null && intent.getExtras().get(CronDBConstants.CRON_ID) != null) {
+		if (intent != null && intent.getExtras() != null && intent.getExtras().get(CronOpenHelper.CRON_ID) != null) {
 			
-			int cronId = intent.getExtras().getInt(CronDBConstants.CRON_ID);
+			int cronId = intent.getExtras().getInt(CronOpenHelper.CRON_ID);
 			Log.d(TAG, "onStartCommand cronId: " + cronId);
 			
 			if (cronId > 0 && cronManager != null) {

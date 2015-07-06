@@ -11,7 +11,6 @@ import android.util.Log;
 
 import com.raxdenstudios.commons.util.ConvertUtils;
 import com.raxdenstudios.cron.db.CronOpenHelper;
-import com.raxdenstudios.cron.db.model.CronDBConstants;
 import com.raxdenstudios.cron.model.Cron;
 import com.raxdenstudios.db.DBManager;
 
@@ -43,7 +42,7 @@ public abstract class CronReceiver extends BroadcastReceiver {
 			db.beginTransaction();
 		
 			// find all cron' s
-			Cursor cursor = DBManager.select(db, CronDBConstants.CRON_TABLE_NAME, null, null, null, null, null);
+			Cursor cursor = DBManager.select(db, CronOpenHelper.CRON_TABLE_NAME, null, null, null, null, null);
 			if (cursor != null && cursor.moveToFirst()) {
 				do {
 					crons.add(new Cron(cursor));
@@ -68,7 +67,7 @@ public abstract class CronReceiver extends BroadcastReceiver {
 	        		   } while (triggerAtTime < nowTime);
 					
 	         		   cron.setTriggerAtTime(triggerAtTime);
-	         		   DBManager.update(db, CronDBConstants.CRON_TABLE_NAME, cron.readContentValues(), CronDBConstants.CRON_ID+"=?", new String[] { Long.toString(cron.getId()) });
+	         		   DBManager.update(db, CronOpenHelper.CRON_TABLE_NAME, cron.readContentValues(), CronOpenHelper.CRON_ID+"=?", new String[] { Long.toString(cron.getId()) });
 					}
 					
 					PendingIntent mCronSender = initPendingIntent(context, getCronService(), ConvertUtils.longToInt(cron.getId()));
@@ -102,7 +101,7 @@ public abstract class CronReceiver extends BroadcastReceiver {
 	
 	protected PendingIntent initPendingIntent(Context context, Class<?> cronService, int cronId) {
 		Intent intent = new Intent(context, cronService);
-		intent.putExtra(CronDBConstants.CRON_ID, cronId);
+		intent.putExtra(CronOpenHelper.CRON_ID, cronId);
 		return PendingIntent.getService(context, cronId, intent, 0);
 	}
 	

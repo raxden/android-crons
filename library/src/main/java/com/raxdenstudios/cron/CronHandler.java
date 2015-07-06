@@ -9,7 +9,6 @@ import android.util.Log;
 import com.raxdenstudios.commons.util.ConvertUtils;
 import com.raxdenstudios.cron.db.CronManager;
 import com.raxdenstudios.cron.db.CronOpenHelper;
-import com.raxdenstudios.cron.db.model.CronDBConstants;
 import com.raxdenstudios.cron.model.Cron;
 import com.raxdenstudios.db.DBManager;
 
@@ -138,7 +137,7 @@ public class CronHandler {
 	
 	protected PendingIntent initPendingIntent(Context context, Class<?> cronService, int cronId) {
 		Intent intent = new Intent(context, cronService);
-		intent.putExtra(CronDBConstants.CRON_ID, cronId);
+		intent.putExtra(CronOpenHelper.CRON_ID, cronId);
 		return PendingIntent.getService(context, cronId, intent, 0);
 	}		
 }

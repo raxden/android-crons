@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.raxdenstudios.cron.db.model.CronDBConstants;
 import com.raxdenstudios.cron.model.Cron;
 import com.raxdenstudios.db.DBManager;
 import com.raxdenstudios.db.task.DBTask;
@@ -26,7 +25,7 @@ public class CronManager extends DBManager<Cron> {
 
 	@Override
 	public void delete(final Cron cron, final DBDeleteCallbacks<Cron> callbacks) {
-        new DeleteDBTask(getOpenHelper(), CronDBConstants.CRON_TABLE_NAME, CronDBConstants.CRON_ID+"=?", new String[] { Long.toString(cron.getId()) }, new DBTask.DBTaskCallbacks<Integer>() {
+        new DeleteDBTask(getOpenHelper(), CronOpenHelper.CRON_TABLE_NAME, CronOpenHelper.CRON_ID+"=?", new String[] { Long.toString(cron.getId()) }, new DBTask.DBTaskCallbacks<Integer>() {
 
 			@Override
 			public void onBeginTransaction(SQLiteDatabase db) {}
@@ -47,7 +46,7 @@ public class CronManager extends DBManager<Cron> {
 
 	@Override
 	public void deleteAll(final DBDeleteAllCallbacks<Cron> callbacks) {
-		SelectDBTask task = new SelectDBTask(getOpenHelper(), CronDBConstants.CRON_TABLE_NAME, new DBTask.DBTaskCallbacks<Cursor>() {
+		SelectDBTask task = new SelectDBTask(getOpenHelper(), CronOpenHelper.CRON_TABLE_NAME, new DBTask.DBTaskCallbacks<Cursor>() {
 
 			private List<Cron> crons = new ArrayList<Cron>();
 			
@@ -62,7 +61,7 @@ public class CronManager extends DBManager<Cron> {
 						crons.add(cron);
 					} while (cursor.moveToNext());
 				}
-				DBManager.deleteAll(db, CronDBConstants.CRON_TABLE_NAME);
+				DBManager.deleteAll(db, CronOpenHelper.CRON_TABLE_NAME);
 			}
 
 			@Override
@@ -82,7 +81,7 @@ public class CronManager extends DBManager<Cron> {
 
 	@Override
 	public void find(final String id, final DBFindCallbacks<Cron> callbacks) {
-		new SelectDBTask(getOpenHelper(), CronDBConstants.CRON_TABLE_NAME, CronDBConstants.CRON_ID+"=?", new String[] { id }, new DBTask.DBTaskCallbacks<Cursor>() {
+		new SelectDBTask(getOpenHelper(), CronOpenHelper.CRON_TABLE_NAME, CronOpenHelper.CRON_ID+"=?", new String[] { id }, new DBTask.DBTaskCallbacks<Cursor>() {
 
 			@Override
 			public void onBeginTransaction(SQLiteDatabase db) {}
@@ -109,7 +108,7 @@ public class CronManager extends DBManager<Cron> {
 
 	@Override
 	public void findAll(final DBFindAllCallbacks<Cron> callbacks) {
-		new SelectDBTask(getOpenHelper(), CronDBConstants.CRON_TABLE_NAME, new DBTask.DBTaskCallbacks<Cursor>() {
+		new SelectDBTask(getOpenHelper(), CronOpenHelper.CRON_TABLE_NAME, new DBTask.DBTaskCallbacks<Cursor>() {
 
 			private List<Cron> crons = new ArrayList<Cron>();
 			
@@ -140,7 +139,7 @@ public class CronManager extends DBManager<Cron> {
 
 	@Override
 	public void save(final Cron cron, final DBSaveCallbacks<Cron> callbacks) {
-		new SaveDBTask(getOpenHelper(), CronDBConstants.CRON_TABLE_NAME, cron, CronDBConstants.CRON_ID+"=?", new String[] { Long.toString(cron.getId()) }, new DBTask.DBTaskCallbacks<Object>() {
+		new SaveDBTask(getOpenHelper(), CronOpenHelper.CRON_TABLE_NAME, cron, CronOpenHelper.CRON_ID+"=?", new String[] { Long.toString(cron.getId()) }, new DBTask.DBTaskCallbacks<Object>() {
 
 			@Override
 			public void onBeginTransaction(SQLiteDatabase db) {}

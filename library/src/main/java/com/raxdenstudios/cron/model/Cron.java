@@ -7,7 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.raxdenstudios.commons.util.ObjectUtils;
-import com.raxdenstudios.cron.db.model.CronDBConstants;
+import com.raxdenstudios.cron.db.CronOpenHelper;
 import com.raxdenstudios.db.DatabaseParcelable;
 
 import java.io.Serializable;
@@ -22,11 +22,11 @@ public class Cron implements Serializable, Parcelable, DatabaseParcelable {
 	private boolean status;
 	
 	public Cron (Cursor cursor) {
-		this.id = cursor.getLong(cursor.getColumnIndex(CronDBConstants.CRON_ID));
-		this.type = cursor.getInt(cursor.getColumnIndex(CronDBConstants.CRON_TYPE));
-		this.triggerAtTime = cursor.getLong(cursor.getColumnIndex(CronDBConstants.CRON_TRIGGER_AT_TIME));
-		this.interval = cursor.getLong(cursor.getColumnIndex(CronDBConstants.CRON_INTERVAL));
-		this.status = cursor.getInt(cursor.getColumnIndex(CronDBConstants.CRON_STATUS)) == 1;
+		this.id = cursor.getLong(cursor.getColumnIndex(CronOpenHelper.CRON_ID));
+		this.type = cursor.getInt(cursor.getColumnIndex(CronOpenHelper.CRON_TYPE));
+		this.triggerAtTime = cursor.getLong(cursor.getColumnIndex(CronOpenHelper.CRON_TRIGGER_AT_TIME));
+		this.interval = cursor.getLong(cursor.getColumnIndex(CronOpenHelper.CRON_INTERVAL));
+		this.status = cursor.getInt(cursor.getColumnIndex(CronOpenHelper.CRON_STATUS)) == 1;
 	}
 
 	public Cron (Parcel in) {
@@ -100,11 +100,11 @@ public class Cron implements Serializable, Parcelable, DatabaseParcelable {
 	@Override
 	public ContentValues readContentValues() {
 		ContentValues values = new ContentValues();
-		if (id > 0) values.put(CronDBConstants.CRON_ID, id);
-		values.put(CronDBConstants.CRON_TRIGGER_AT_TIME, triggerAtTime);
-		values.put(CronDBConstants.CRON_INTERVAL, interval);
-		values.put(CronDBConstants.CRON_TYPE, type);
-		values.put(CronDBConstants.CRON_STATUS, status ? 1 : 0);
+		if (id > 0) values.put(CronOpenHelper.CRON_ID, id);
+		values.put(CronOpenHelper.CRON_TRIGGER_AT_TIME, triggerAtTime);
+		values.put(CronOpenHelper.CRON_INTERVAL, interval);
+		values.put(CronOpenHelper.CRON_TYPE, type);
+		values.put(CronOpenHelper.CRON_STATUS, status ? 1 : 0);
 		return values;
 	}
 		
