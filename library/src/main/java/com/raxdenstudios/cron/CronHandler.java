@@ -20,11 +20,11 @@ public class CronHandler {
     private static final String TAG = CronHandler.class.getSimpleName();
 
 	public interface StartCronCallbacks {
-		public void onCronStarted(Cron cron);
+		void onCronStarted(Cron cron);
 	}
 
 	public interface FinishCronCallbacks {
-		public void onCronFinished(Cron cron);
+		void onCronFinished(Cron cron);
 	}
 	
 	private Context context;
@@ -93,10 +93,10 @@ public class CronHandler {
 	
 	public void startNotPersist(Cron cron, StartCronCallbacks callbacks) {
 		if (cron != null && cron.getTriggerAtTime() > 0) {
-			Log.d(TAG, "start cron: " + cron.toString());
-			Log.d(TAG, "     now 		  - " + new Date().toString());
-			Log.d(TAG, "     triggerAtTime - " + new Date(cron.getTriggerAtTime()).toString());
-			Log.d(TAG, "     interval 	  - " + (cron.getInterval() / AlarmManager.INTERVAL_HOUR) + " hours");
+			Log.d(TAG, "[startNotPersist] start cron: " + cron.toString());
+			Log.d(TAG, "[startNotPersist]      now 		  - " + new Date().toString());
+			Log.d(TAG, "[startNotPersist]      triggerAtTime - " + new Date(cron.getTriggerAtTime()).toString());
+			Log.d(TAG, "[startNotPersist]      interval 	  - " + (cron.getInterval() / AlarmManager.INTERVAL_HOUR) + " hours");
 			
 			AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 			PendingIntent mCronSender = initPendingIntent(context, cronService, ConvertUtils.longToInt(cron.getId()));
@@ -119,7 +119,7 @@ public class CronHandler {
 	
 	public void finishNotPersist(Cron cron, FinishCronCallbacks callbacks) {
 		if (cron != null) {
-			Log.d(TAG, "finish cron: " + cron.toString());
+			Log.d(TAG, "[finishNotPersist] finish cron: " + cron.toString());
 			
 			AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 			PendingIntent mCronSender = initPendingIntent(context, cronService, ConvertUtils.longToInt(cron.getId()));

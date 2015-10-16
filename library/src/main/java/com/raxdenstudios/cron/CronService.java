@@ -38,7 +38,7 @@ public abstract class CronService extends Service {
 		if (intent != null && intent.getExtras() != null && intent.getExtras().get(CronOpenHelper.CRON_ID) != null) {
 			
 			int cronId = intent.getExtras().getInt(CronOpenHelper.CRON_ID);
-			Log.d(TAG, "onStartCommand cronId: " + cronId);
+			Log.d(TAG, "[onStartCommand] cronId: " + cronId);
 			
 			if (cronId > 0 && cronManager != null) {
 			

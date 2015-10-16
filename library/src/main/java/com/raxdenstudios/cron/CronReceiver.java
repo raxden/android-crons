@@ -26,7 +26,7 @@ public abstract class CronReceiver extends BroadcastReceiver {
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.d(TAG, "onReceive");
+		Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"]");
 		
 		List<Cron> crons = new ArrayList<Cron>();
 		
@@ -38,7 +38,7 @@ public abstract class CronReceiver extends BroadcastReceiver {
 			oh = initCronOpenHelper(context);
 			db = oh.getWritableDatabase();
 			
-			Log.d(TAG, "beginTransaction");
+			Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"] beginTransaction");
 			db.beginTransaction();
 		
 			// find all cron' s
@@ -47,11 +47,11 @@ public abstract class CronReceiver extends BroadcastReceiver {
 				do {
 					crons.add(new Cron(cursor));
 				} while (cursor.moveToNext());
+				cursor.close();
 			}
 			
 			if (crons != null && !crons.isEmpty()) {
-				Log.d(TAG, crons.size() + " crons was found.");
-				Log.d(TAG, "cronService: " + getCronService().getSimpleName());
+				Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"] "+crons.size() + " crons was found.");
 				
 				AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 				
@@ -86,7 +86,7 @@ public abstract class CronReceiver extends BroadcastReceiver {
 			}
 			
 			db.setTransactionSuccessful();
-			Log.d(TAG, "transactionSuccessful");
+			Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"] transactionSuccessful");
 			
 		} catch (Exception e) {
 			Log.e(TAG, e.getMessage(), e);

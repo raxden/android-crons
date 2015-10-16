@@ -35,10 +35,8 @@ public class CronManager extends DBManager<Cron> {
 			
 			@Override
 			public void onCompletion(Integer deletedRows) {	
-				Log.d(TAG, "cron deleted: " + cron.toString());
-				if (callbacks != null) {
-					callbacks.dataDeleted(cron);
-				}
+				Log.d(TAG, "[onCompletion] cron deleted: " + cron.toString());
+				if (callbacks != null) callbacks.dataDeleted(cron);
 			}
         	
 		}).execute();
@@ -67,11 +65,9 @@ public class CronManager extends DBManager<Cron> {
 			@Override
 			public void onCompletion(Cursor cursor) {
                 for (Cron cron : crons) {
-                    Log.d(TAG, "cron deleted: "+cron.toString());
+                    Log.d(TAG, "[onCompletion] cron deleted: "+cron.toString());
                 }
-				if (callbacks != null) {
-					callbacks.dataDeleted(crons);
-				}
+				if (callbacks != null) callbacks.dataDeleted(crons);
 			}				
 			
 		});
@@ -94,13 +90,11 @@ public class CronManager extends DBManager<Cron> {
 				Cron cron = null;
 				if (cursor != null && cursor.moveToFirst()) {
 					cron = new Cron(cursor);
-					Log.d(TAG, "cron found: "+cron.toString());
+					Log.d(TAG, "[onCompletion] cron found: "+cron.toString());
 				} else {
-					Log.d(TAG, "cron not found: "+id);
+					Log.d(TAG, "[onCompletion] cron not found: "+id);
 				}
-				if (callbacks != null) {
-					callbacks.dataFound(cron);
-				}
+				if (callbacks != null) callbacks.dataFound(cron);
 			}				
 			
 		}).execute();
@@ -127,11 +121,9 @@ public class CronManager extends DBManager<Cron> {
 					} while (cursor.moveToNext());
 				}
                 for (Cron cron : crons) {
-                    Log.d(TAG, "cron found: "+cron.toString());
-                }
-				if (callbacks != null) {
-					callbacks.dataFound(crons);
+					Log.d(TAG, "[onCompletion] cron found: "+cron.toString());
 				}
+				if (callbacks != null) callbacks.dataFound(crons);
 			}				
 			
 		}).execute();
@@ -146,17 +138,13 @@ public class CronManager extends DBManager<Cron> {
 
 			@Override
 			public void onPreFinalizeTransaction(SQLiteDatabase db, Object result) {
-				if (result instanceof Long) {
-					cron.setId((Long)result);
-				}
+				if (result instanceof Long) cron.setId((Long)result);
 			}
 
 			@Override
 			public void onCompletion(Object result) {
-				Log.d(TAG, "cron saved: "+cron.toString());
-				if (callbacks != null) {
-					callbacks.dataSaved(cron);
-				}
+				Log.d(TAG, "[onCompletion] cron saved: "+cron.toString());
+				if (callbacks != null) callbacks.dataSaved(cron);
 			}
 			
 		}).execute();
