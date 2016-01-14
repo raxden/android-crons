@@ -1,9 +1,9 @@
 Android Crons
 ==========
 
-Android Crons is a util library that allows use crons on Android. Works on Android 2.3 (API level 10) and upwards.
+Android Crons is a util library that allows use crons on Android. Works on Android 4.1 (API level 16) and upwards.
 
-[![Release](https://img.shields.io/github/release/raxden/AndroidCrons.svg?label=maven central)](https://jitpack.io/#raxden/AndroidCrons/) [![API](https://img.shields.io/badge/API-10%2B-green.svg?style=flat)](https://android-arsenal.com/api?level=10)
+[![Release](https://img.shields.io/github/release/raxden/AndroidCrons.svg?label=maven central)](https://jitpack.io/#raxden/AndroidCrons/) [![API](https://img.shields.io/badge/API-16%2B-green.svg?style=flat)](https://android-arsenal.com/api?level=16)
 
 ## Usage
 
@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-	    compile 'com.github.raxden:AndroidCrons:v2.1.6@aar'
+	    compile 'com.github.raxden:AndroidCrons:v2.2.0@aar'
 }
 ```
 
@@ -33,7 +33,7 @@ dependencies {
 <dependency>
 	    <groupId>com.github.raxden</groupId>
 	    <artifactId>AndroidCrons</artifactId>
-	    <version>v2.1.6</version>
+	    <version>v2.2.0</version>
 </dependency>
 ```
 
@@ -43,4 +43,4 @@ dependencies {
 
 ### Documentation 
 
-For a **detailed documentation**, please have a look at the [**Wiki**](https://github.com/raxden/AndroidCrons/wiki) or the [**Javadocs**](https://jitpack.io/com/github/raxden/AndroidCrons/v2.1.6/javadoc/).
+For a **detailed documentation**, please have a look at the [**Wiki**](https://github.com/raxden/AndroidCrons/wiki) or the [**Javadocs**](https://jitpack.io/com/github/raxden/AndroidCrons/v2.2.0/javadoc/).
