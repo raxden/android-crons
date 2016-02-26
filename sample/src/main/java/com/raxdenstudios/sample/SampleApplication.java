@@ -18,6 +18,5 @@ public class SampleApplication extends Application {
 
         RealmConfiguration config = new RealmConfiguration.Builder(this).build();
         Realm.setDefaultConfiguration(config);
-
     }
 }
