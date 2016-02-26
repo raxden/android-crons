@@ -1,60 +1,33 @@
 package com.raxdenstudios.cron.model;
 
 import android.app.AlarmManager;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.util.Log;
 
 import com.raxdenstudios.commons.util.ObjectUtils;
-import com.raxdenstudios.cron.db.CronOpenHelper;
-import com.raxdenstudios.db.DatabaseParcelable;
 
-import java.io.Serializable;
+import java.util.Date;
 
-@SuppressWarnings("serial")
-public class Cron implements Serializable, Parcelable, DatabaseParcelable {
+import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.PrimaryKey;
 
+public class Cron extends RealmObject {
+
+	@PrimaryKey
 	private long id;
 	private int type;
 	private long triggerAtTime;
 	private long interval;
 	private boolean status;
-	
-	public Cron (Cursor cursor) {
-		this.id = cursor.getLong(cursor.getColumnIndex(CronOpenHelper.CRON_ID));
-		this.type = cursor.getInt(cursor.getColumnIndex(CronOpenHelper.CRON_TYPE));
-		this.triggerAtTime = cursor.getLong(cursor.getColumnIndex(CronOpenHelper.CRON_TRIGGER_AT_TIME));
-		this.interval = cursor.getLong(cursor.getColumnIndex(CronOpenHelper.CRON_INTERVAL));
-		this.status = cursor.getInt(cursor.getColumnIndex(CronOpenHelper.CRON_STATUS)) == 1;
-	}
 
-	public Cron (Parcel in) {
-		id = in.readLong();
-		type = in.readInt();
-		triggerAtTime = in.readLong();
-		interval = in.readLong();
-		status = in.readInt() == 1;
-	}
-	
-	public Cron (long id) {
-		this(id, 0, 0);
-	}
-	
-	public Cron (long id, long triggerAtTime, long interval) {
-		this(id, triggerAtTime, interval, AlarmManager.RTC_WAKEUP);
-	}
-	
-	public Cron (long id, long triggerAtTime, long interval, int type) {
-		this(id, triggerAtTime, interval, type, true);
-	}
-	
-	public Cron (long id, long triggerAtTime, long interval, int type, boolean status) {
-		this.id = id;
-		this.triggerAtTime = triggerAtTime;
-		this.interval = interval;
-		this.type = type;
-		this.status = status;
+	public Cron() {}
+
+	private Cron(Builder builder) {
+		this.id = builder.id;
+		this.triggerAtTime = builder.triggerAtTime;
+		this.interval = builder.interval;
+		this.type = builder.type;
+		this.status = builder.status;
 	}
 
 	public long getId() {
@@ -88,7 +61,7 @@ public class Cron implements Serializable, Parcelable, DatabaseParcelable {
 	public void setInterval(long interval) {
 		this.interval = interval;
 	}
-	
+
 	public boolean isStatus() {
 		return status;
 	}
@@ -97,43 +70,67 @@ public class Cron implements Serializable, Parcelable, DatabaseParcelable {
 		this.status = status;
 	}
 
-	@Override
-	public ContentValues readContentValues() {
-		ContentValues values = new ContentValues();
-		if (id > 0) values.put(CronOpenHelper.CRON_ID, id);
-		values.put(CronOpenHelper.CRON_TRIGGER_AT_TIME, triggerAtTime);
-		values.put(CronOpenHelper.CRON_INTERVAL, interval);
-		values.put(CronOpenHelper.CRON_TYPE, type);
-		values.put(CronOpenHelper.CRON_STATUS, status ? 1 : 0);
-		return values;
-	}
-		
-	public String toString() {
-		return ObjectUtils.dump(this);
-	}
+	public static class Builder {
 
-	public static final Parcelable.Creator<Cron> CREATOR = new Parcelable.Creator<Cron>() {
-		public Cron createFromParcel(Parcel in) {
-			return new Cron(in);
+		private long id;
+		private int type;
+		private long triggerAtTime;
+		private long interval;
+		private boolean status;
+
+		public Builder() {
+			this(0);
 		}
 
-		public Cron[] newArray(int size) {
-			return new Cron[size];
+		public Builder (long id) {
+			this(id, 0, 0);
 		}
-	};	
-	
-	@Override
-	public int describeContents() {
-		return 0;
-	}
 
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeLong(id);
-		dest.writeInt(type);
-		dest.writeLong(triggerAtTime);
-		dest.writeLong(interval);
-		dest.writeInt(status ? 1 : 0);
+		public Builder (long id, long triggerAtTime, long interval) {
+			this(id, triggerAtTime, interval, AlarmManager.RTC_WAKEUP);
+		}
+
+		public Builder (long id, long triggerAtTime, long interval, int type) {
+			this(id, triggerAtTime, interval, type, true);
+		}
+
+		public Builder (long id, long triggerAtTime, long interval, int type, boolean status) {
+			this.id = id;
+			this.triggerAtTime = triggerAtTime;
+			this.interval = interval;
+			this.type = type;
+			this.status = status;
+		}
+
+		public Builder id(long id) {
+			this.id = id;
+			return this;
+		}
+
+		public Builder type(int type) {
+			this.type = type;
+			return this;
+		}
+
+		public Builder triggerAtTime(long triggerAtTime) {
+			this.triggerAtTime = triggerAtTime;
+			return this;
+		}
+
+		public Builder interval(long interval) {
+			this.interval = interval;
+			return this;
+		}
+
+		public Builder status(boolean status) {
+			this.status = status;
+			return this;
+		}
+
+		public Cron create() {
+			return new Cron(this);
+		}
+
 	}
 
 }

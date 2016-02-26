@@ -7,13 +7,17 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.raxdenstudios.commons.util.ConvertUtils;
-import com.raxdenstudios.cron.db.CronManager;
-import com.raxdenstudios.cron.db.CronOpenHelper;
+import com.raxdenstudios.commons.util.Utils;
 import com.raxdenstudios.cron.model.Cron;
-import com.raxdenstudios.db.DBManager;
+import com.raxdenstudios.cron.util.CronUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class CronHandler {
 
@@ -21,85 +25,97 @@ public class CronHandler {
 
 	public interface StartCronCallbacks {
 		void onCronStarted(Cron cron);
+		void onCronError(String errorMessage);
 	}
 
 	public interface FinishCronCallbacks {
 		void onCronFinished(Cron cron);
+		void onCronError(String errorMessage);
 	}
 	
-	private Context context;
-	private Class<?> cronService;
-	private CronManager cronManager;
+	private Context mContext;
+	private Realm mRealm;
 	
-	public CronHandler(Context context, CronOpenHelper oh, Class<?> cronService) {
-		this(context, new CronManager(oh), cronService);
-	}
-	
-	public CronHandler(Context context, CronManager cronManager, Class<?> cronService) {
-		this.context = context;
-		this.cronManager = cronManager;
-		this.cronService = cronService;
-	}
-	
-	public void close() {
-		if (cronManager != null) {
-			cronManager.close();
-		}
-	}
-	
-	public CronManager getCronManager() {
-		return cronManager;
+	public CronHandler(Context context, Realm realm) {
+		mContext = context;
+		mRealm = realm;
 	}
 
-	public void start(long triggerAtTime, long interval, StartCronCallbacks callbacks) {
-		start(triggerAtTime, interval, AlarmManager.RTC_WAKEUP, callbacks);
-	}
-	
-	public void start(long triggerAtTime, long interval, int type, StartCronCallbacks callbacks) {
-		start(new Cron(0, triggerAtTime, interval, type), callbacks);
-	}
-	
-	public void start(Cron cron, final StartCronCallbacks callbacks) {
-		cronManager.save(cron, new DBManager.DBSaveCallbacks<Cron>() {
+	public void start(final Cron cron, final StartCronCallbacks callbacks) {
+		mRealm.executeTransaction(new Realm.Transaction() {
+			@Override
+			public void execute(Realm realm) {
+                if (cron.getId() == 0) {
+                    cron.setId(realm.where(Cron.class).max("id").longValue() + 1);
+                }
+				realm.copyToRealmOrUpdate(cron);
+			}
+		}, new Realm.Transaction.Callback() {
+			@Override
+			public void onSuccess() {
+				startNotPersist(cron, callbacks);
+			}
 
 			@Override
-			public void dataSaved(Cron cron) {
-				startNotPersist(cron, callbacks);
+			public void onError(Exception e) {
+				Log.e(TAG, e.getMessage(), e);
+				if (callbacks != null) callbacks.onCronError(e.getMessage());
 			}
 		});
 	}
 		
-	public void finish(Cron cron, final FinishCronCallbacks callbacks) {
-		cronManager.delete(cron, new DBManager.DBDeleteCallbacks<Cron>() {
+	public void finish(final Cron cron, final FinishCronCallbacks callbacks) {
+		mRealm.executeTransaction(new Realm.Transaction() {
+			@Override
+			public void execute(Realm realm) {
+				cron.removeFromRealm();
+			}
+		}, new Realm.Transaction.Callback() {
+			@Override
+			public void onSuccess() {
+				finishNotPersist(cron, callbacks);
+			}
 
 			@Override
-			public void dataDeleted(Cron cron) {
-				finishNotPersist(cron, callbacks);
+			public void onError(Exception e) {
+				Log.e(TAG, e.getMessage(), e);
+				if (callbacks != null) callbacks.onCronError(e.getMessage());
 			}
 		});
 	}
 	
 	public void finishAll(final FinishCronCallbacks callbacks) {
-		cronManager.deleteAll(new DBManager.DBDeleteAllCallbacks<Cron>() {
-
+		final List<Cron> crons = new ArrayList<>();
+		mRealm.executeTransaction(new Realm.Transaction() {
 			@Override
-			public void dataDeleted(List<Cron> crons) {
+			public void execute(Realm realm) {
+				RealmResults<Cron> result = realm.where(Cron.class).findAll();
+				crons.addAll(Arrays.asList(result.toArray(new Cron[result.size()])));
+			}
+		}, new Realm.Transaction.Callback() {
+			@Override
+			public void onSuccess() {
 				for (Cron cron : crons) {
 					finishNotPersist(cron, callbacks);
 				}
+			}
+
+			@Override
+			public void onError(Exception e) {
+				Log.e(TAG, e.getMessage(), e);
+				if (callbacks != null) callbacks.onCronError(e.getMessage());
 			}
 		});
 	}	
 	
 	public void startNotPersist(Cron cron, StartCronCallbacks callbacks) {
 		if (cron != null && cron.getTriggerAtTime() > 0) {
-			Log.d(TAG, "[startNotPersist] start cron: " + cron.toString());
-			Log.d(TAG, "[startNotPersist]      now 		  - " + new Date().toString());
-			Log.d(TAG, "[startNotPersist]      triggerAtTime - " + new Date(cron.getTriggerAtTime()).toString());
-			Log.d(TAG, "[startNotPersist]      interval 	  - " + (cron.getInterval() / AlarmManager.INTERVAL_HOUR) + " hours");
-			
-			AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-			PendingIntent mCronSender = initPendingIntent(context, cronService, ConvertUtils.longToInt(cron.getId()));
+            Log.d(TAG, "==[Cron started]==================================");
+			Log.d(TAG, CronUtils.dump(cron));
+            Log.d(TAG, "=====================================================");
+
+			AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+			PendingIntent mCronSender = initPendingIntent(mContext, cron);
 			
 			if (manager != null && mCronSender != null) {
 			    // Schedule the cron!
@@ -119,10 +135,12 @@ public class CronHandler {
 	
 	public void finishNotPersist(Cron cron, FinishCronCallbacks callbacks) {
 		if (cron != null) {
-			Log.d(TAG, "[finishNotPersist] finish cron: " + cron.toString());
-			
-			AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-			PendingIntent mCronSender = initPendingIntent(context, cronService, ConvertUtils.longToInt(cron.getId()));
+			Log.d(TAG, "==[Cron finished]=================================");
+            Log.d(TAG, CronUtils.dump(cron));
+			Log.d(TAG, "=====================================================");
+
+			AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+			PendingIntent mCronSender = initPendingIntent(mContext, cron);
 		    
 			if (mCronSender != null) {
 				// Cancel the cron!
@@ -135,9 +153,11 @@ public class CronHandler {
 		}
 	}
 	
-	protected PendingIntent initPendingIntent(Context context, Class<?> cronService, int cronId) {
-		Intent intent = new Intent(context, cronService);
-		intent.putExtra(CronOpenHelper.CRON_ID, cronId);
-		return PendingIntent.getService(context, cronId, intent, 0);
-	}		
+	protected PendingIntent initPendingIntent(Context context, Cron cron) {
+		Intent intent = new Intent();
+        intent.setAction(Utils.getPackageName(context)+".CRON");
+		intent.putExtra(Cron.class.getSimpleName(), cron.getId());
+		return PendingIntent.getService(context, ConvertUtils.longToInt(cron.getId()), intent, 0);
+	}
+
 }

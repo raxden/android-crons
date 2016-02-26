@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group = 'com.raxdenstudios'
-version = '2.2.0'
+version = '2.3.0'
 
 android {
     compileSdkVersion 23
@@ -33,8 +33,10 @@ repositories {
 
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
-    compile 'com.github.raxden:AndroidCommons:v2.2.0@aar'
-    compile 'com.github.raxden:AndroidDB:v2.2.0@aar'
+
+    compile 'com.github.raxden:AndroidCommons:v2.2.4@aar'
+
+    compile 'io.realm:realm-android:0.87.5'
 }
 
 task sourcesJar(type: Jar) {

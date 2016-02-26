@@ -1,79 +1,63 @@
 package com.raxdenstudios.cron;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.raxdenstudios.cron.db.CronManager;
-import com.raxdenstudios.cron.db.CronOpenHelper;
 import com.raxdenstudios.cron.model.Cron;
-import com.raxdenstudios.db.DBManager;
+import com.raxdenstudios.cron.util.CronUtils;
+
+import java.util.Calendar;
+
+import io.realm.Realm;
 
 public abstract class CronService extends Service {
 
     private static final String TAG = CronService.class.getSimpleName();
 
-	private CronManager cronManager;
-	
+	private Realm mRealm;
+
     @Override
     public void onCreate() {
     	super.onCreate();
-    	
-    	CronOpenHelper oh = initCronOpenHelper(getApplicationContext());
-    	cronManager = new CronManager(oh);
+
+		mRealm = Realm.getInstance(getApplicationContext());
     }
-    
-    protected abstract CronOpenHelper initCronOpenHelper(Context context);
-	    
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
     	super.onStartCommand(intent, flags, startId);
-    	
-		if (intent != null && intent.getExtras() != null && intent.getExtras().get(CronOpenHelper.CRON_ID) != null) {
-			
-			int cronId = intent.getExtras().getInt(CronOpenHelper.CRON_ID);
-			Log.d(TAG, "[onStartCommand] cronId: " + cronId);
-			
-			if (cronId > 0 && cronManager != null) {
-			
-				cronManager.find(Integer.toString(cronId), new DBManager.DBFindCallbacks<Cron>() {
 
-					@Override
-					public void dataFound(Cron cron) {
-						if (cron != null && cron.isStatus()) {
-							onCronLaunched(cronManager.getOpenHelper(), cron);
-						} else {
-							stopSelf();
-						}
-					}
-					
-				});
-				
-			} else {
-				stopSelf();
-			}
-			
-		} else {
-			stopSelf();
+		if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(Cron.class.getSimpleName())) {
+            long cronId = intent.getExtras().getLong(Cron.class.getSimpleName());
+            if (cronId > 0) {
+                Cron cron = mRealm.where(Cron.class).equalTo("id", cronId).findFirst();
+                if (cron != null) {
+                    mRealm.beginTransaction();
+                    cron.setTriggerAtTime((Calendar.getInstance().getTimeInMillis() + cron.getInterval()));
+                    mRealm.commitTransaction();
+                    if (cron.isStatus()) {
+                        Log.d(TAG, "[onCronLaunched] " + CronUtils.dump(cron));
+                        onCronLaunched(cron);
+                    }
+                }
+            }
 		}
-        
         return START_STICKY;
     }
     
-	protected abstract void onCronLaunched(SQLiteOpenHelper oh, Cron cron);
+	protected abstract void onCronLaunched(Cron cron);
     
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		
-		if (cronManager != null) {
-			cronManager.close();
+		if (mRealm != null) {
+			mRealm.close();
 		}		
 	}
 
@@ -81,8 +65,12 @@ public abstract class CronService extends Service {
 	public IBinder onBind(Intent intent) {
 		return mBinder;
 	}
-	
-    /**
+
+	public Realm getRealm() {
+		return mRealm;
+	}
+
+	/**
      * This is the object that receives interactions from clients.  See RemoteService
      * for a more complete example.
      */
@@ -92,9 +80,5 @@ public abstract class CronService extends Service {
             return super.onTransact(code, data, reply, flags);
         }
     };
-
-	public CronManager getCronManager() {
-		return cronManager;
-	}
 
 }

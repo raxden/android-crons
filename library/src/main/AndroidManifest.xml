@@ -2,4 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.raxdenstudios.cron" >
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application>
+
+        <!-- Notification Service -->
+        <!--<service android:name="{YOUR_PACKAGE}.CronService"/>-->
+
+        <!-- Notification Receiver -->
+        <receiver android:name="com.raxdenstudios.cron.CronReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
 </manifest>

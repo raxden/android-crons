@@ -5,104 +5,67 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.raxdenstudios.commons.util.ConvertUtils;
-import com.raxdenstudios.cron.db.CronOpenHelper;
+import com.raxdenstudios.commons.util.Utils;
 import com.raxdenstudios.cron.model.Cron;
-import com.raxdenstudios.db.DBManager;
+import com.raxdenstudios.cron.util.CronUtils;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public abstract class CronReceiver extends BroadcastReceiver {
+import io.realm.Realm;
+import io.realm.RealmResults;
+
+public class CronReceiver extends BroadcastReceiver {
 
     private static final String TAG = CronReceiver.class.getSimpleName();
 
-    public abstract CronOpenHelper initCronOpenHelper(Context context);
-	
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"]");
-		
-		List<Cron> crons = new ArrayList<Cron>();
-		
-		CronOpenHelper oh = null;
-		SQLiteDatabase db = null;
-		
-		try {
-		
-			oh = initCronOpenHelper(context);
-			db = oh.getWritableDatabase();
-			
-			Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"] beginTransaction");
-			db.beginTransaction();
-		
-			// find all cron' s
-			Cursor cursor = DBManager.select(db, CronOpenHelper.CRON_TABLE_NAME, null, null, null, null, null);
-			if (cursor != null && cursor.moveToFirst()) {
+
+		Realm mRealm = Realm.getInstance(context);
+		RealmResults<Cron> result = mRealm.where(Cron.class).findAll();
+
+		List<Cron> crons = Arrays.asList(result.toArray(new Cron[result.size()]));
+		Log.d(TAG, "[onReceive] "+crons.size() + " crons was found.");
+
+		AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		long now = Calendar.getInstance().getTimeInMillis();
+
+		for (Cron cron : crons) {
+			long triggerAtTime = cron.getTriggerAtTime();
+			if (triggerAtTime < now) {
 				do {
-					crons.add(new Cron(cursor));
-				} while (cursor.moveToNext());
-				cursor.close();
-			}
-			
-			if (crons != null && !crons.isEmpty()) {
-				Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"] "+crons.size() + " crons was found.");
-				
-				AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-				
-	    		long nowTime = Calendar.getInstance().getTimeInMillis();
-				
-				for (Cron cron : crons) {
-	
-		    		long triggerAtTime = cron.getTriggerAtTime();
-					
-					if (triggerAtTime < nowTime) {
-	         		   do {
-	         			  triggerAtTime = triggerAtTime + cron.getInterval();
-	        		   } while (triggerAtTime < nowTime);
-					
-	         		   cron.setTriggerAtTime(triggerAtTime);
-	         		   DBManager.update(db, CronOpenHelper.CRON_TABLE_NAME, cron.readContentValues(), CronOpenHelper.CRON_ID+"=?", new String[] { Long.toString(cron.getId()) });
+					triggerAtTime = triggerAtTime + cron.getInterval();
+				} while (triggerAtTime < now);
+
+				mRealm.beginTransaction();
+				cron.setTriggerAtTime(triggerAtTime);
+				mRealm.commitTransaction();
+
+				PendingIntent mCronSender = initPendingIntent(context, cron);
+				if (mCronSender != null) {
+					// Schedule the cron!
+					alarmManager.cancel(mCronSender);
+					if (cron.getInterval() > 0) {
+						alarmManager.setRepeating(cron.getType(), cron.getTriggerAtTime(), cron.getInterval(), mCronSender);
+					} else {
+						alarmManager.set(cron.getType(), cron.getTriggerAtTime(), mCronSender);
 					}
-					
-					PendingIntent mCronSender = initPendingIntent(context, getCronService(), ConvertUtils.longToInt(cron.getId()));
-					
-					if (mCronSender != null) {
-					    // Schedule the cron!
-						manager.cancel(mCronSender);   
-						if (cron.getInterval() > 0) {
-							manager.setRepeating(cron.getType(), cron.getTriggerAtTime(), cron.getInterval(), mCronSender);
-						} else {
-							manager.set(cron.getType(), cron.getTriggerAtTime(), mCronSender);
-						}
-					}				
-					
+					Log.d(TAG, "[onReceive] AlarmManager updated with cron: "+ CronUtils.dump(cron));
 				}
 			}
-			
-			db.setTransactionSuccessful();
-			Log.d(TAG, "[onReceive]["+getCronService().getSimpleName()+"] transactionSuccessful");
-			
-		} catch (Exception e) {
-			Log.e(TAG, e.getMessage(), e);
-		} finally {
-			if (db != null) db.endTransaction();
-			if (oh != null) oh.close();
 		}
-
 	}
-	
-	public abstract Class<?> getCronService();
-	
-	protected PendingIntent initPendingIntent(Context context, Class<?> cronService, int cronId) {
-		Intent intent = new Intent(context, cronService);
-		intent.putExtra(CronOpenHelper.CRON_ID, cronId);
-		return PendingIntent.getService(context, cronId, intent, 0);
+
+	protected PendingIntent initPendingIntent(Context context, Cron cron) {
+		Intent intent = new Intent();
+		intent.setAction(Utils.getPackageName(context)+".CRON");
+		intent.putExtra(Cron.class.getSimpleName(), cron.getId());
+		return PendingIntent.getService(context, ConvertUtils.longToInt(cron.getId()), intent, 0);
 	}
 	
 }
