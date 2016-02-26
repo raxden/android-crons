@@ -44,3 +44,5 @@ dependencies {
 ### Documentation 
 
 For a **detailed documentation**, please have a look at the [**Wiki**](https://github.com/raxden/AndroidCrons/wiki) or the [**Javadocs**](https://jitpack.io/com/github/raxden/AndroidCrons/v2.2.0/javadoc/).
+
+Furthermore, you can also rely on the [**Sample**](https://github.com/raxden/AndroidCrons/tree/master/sample). folder and check out the example code in that project.
