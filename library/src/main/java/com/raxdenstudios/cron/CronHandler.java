@@ -14,6 +14,7 @@ import com.raxdenstudios.cron.util.CronUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import io.realm.Realm;
@@ -29,7 +30,7 @@ public class CronHandler {
 	}
 
 	public interface FinishCronCallbacks {
-		void onCronFinished(Cron cron);
+		void onCronFinished(long cronId);
 		void onCronError(String errorMessage);
 	}
 	
@@ -53,7 +54,9 @@ public class CronHandler {
 		}, new Realm.Transaction.Callback() {
 			@Override
 			public void onSuccess() {
-				startNotPersist(cron, callbacks);
+                Log.d(TAG, "==[Cron created]["+cron.getId()+"]===================");
+				startNotPersist(cron);
+                if (callbacks != null) callbacks.onCronStarted(cron);
 			}
 
 			@Override
@@ -63,41 +66,62 @@ public class CronHandler {
 			}
 		});
 	}
-		
-	public void finish(final Cron cron, final FinishCronCallbacks callbacks) {
-		mRealm.executeTransaction(new Realm.Transaction() {
-			@Override
-			public void execute(Realm realm) {
-				cron.removeFromRealm();
-			}
-		}, new Realm.Transaction.Callback() {
-			@Override
-			public void onSuccess() {
-				finishNotPersist(cron, callbacks);
-			}
 
-			@Override
-			public void onError(Exception e) {
-				Log.e(TAG, e.getMessage(), e);
-				if (callbacks != null) callbacks.onCronError(e.getMessage());
-			}
-		});
+	public void finish(final long cronId, final FinishCronCallbacks callbacks) {
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                final Cron cron = realm.where(Cron.class).equalTo("id", cronId).findFirst();
+                if (cron != null) {
+                    finishNotPersist(cron);
+                    cron.removeFromRealm();
+                } else {
+                    if (callbacks != null) callbacks.onCronError("Cron with "+cronId+" not exists");
+                }
+            }
+        }, new Realm.Transaction.Callback() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "==[Cron removed]["+cronId+"]===================");
+                if (callbacks != null) callbacks.onCronFinished(cronId);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                if (callbacks != null) callbacks.onCronError(e.getMessage());
+            }
+        });
+	}
+
+	public void finish(final Cron cron, final FinishCronCallbacks callbacks) {
+        finish(cron.getId(), callbacks);
 	}
 	
 	public void finishAll(final FinishCronCallbacks callbacks) {
-		final List<Cron> crons = new ArrayList<>();
+		final List<Long> crons = new ArrayList<>();
 		mRealm.executeTransaction(new Realm.Transaction() {
 			@Override
 			public void execute(Realm realm) {
 				RealmResults<Cron> result = realm.where(Cron.class).findAll();
-				crons.addAll(Arrays.asList(result.toArray(new Cron[result.size()])));
+                if (result.size() == 0) {
+                    if (callbacks != null) callbacks.onCronError("Crons not found.");
+                } else {
+                    Iterator<Cron> iterator = result.iterator();
+                    while (iterator.hasNext()) {
+                        Cron cron = iterator.next();
+                        finishNotPersist(cron);
+                        crons.add(cron.getId());
+                    }
+                    result.clear();
+                }
 			}
 		}, new Realm.Transaction.Callback() {
 			@Override
 			public void onSuccess() {
-				for (Cron cron : crons) {
-					finishNotPersist(cron, callbacks);
-				}
+                for (Long cronId : crons) {
+                    if (callbacks != null) callbacks.onCronFinished(cronId);
+                }
 			}
 
 			@Override
@@ -108,11 +132,10 @@ public class CronHandler {
 		});
 	}	
 	
-	public void startNotPersist(Cron cron, StartCronCallbacks callbacks) {
+	public void startNotPersist(Cron cron) {
 		if (cron != null && cron.getTriggerAtTime() > 0) {
-            Log.d(TAG, "==[Cron started]==================================");
+            Log.d(TAG, "==[Cron started]["+cron.getId()+"]===================");
 			Log.d(TAG, CronUtils.dump(cron));
-            Log.d(TAG, "=====================================================");
 
 			AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 			PendingIntent mCronSender = initPendingIntent(mContext, cron);
@@ -125,19 +148,14 @@ public class CronHandler {
 				} else {
 					manager.set(cron.getType(), cron.getTriggerAtTime(), mCronSender);
 				}
-		        
-		        if (callbacks != null) {
-		        	callbacks.onCronStarted(cron);
-		        }
 			}
 		}
 	}
 	
-	public void finishNotPersist(Cron cron, FinishCronCallbacks callbacks) {
+	public void finishNotPersist(Cron cron) {
 		if (cron != null) {
-			Log.d(TAG, "==[Cron finished]=================================");
+			Log.d(TAG, "==[Cron finished]["+cron.getId()+"]===================");
             Log.d(TAG, CronUtils.dump(cron));
-			Log.d(TAG, "=====================================================");
 
 			AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 			PendingIntent mCronSender = initPendingIntent(mContext, cron);
@@ -145,10 +163,6 @@ public class CronHandler {
 			if (mCronSender != null) {
 				// Cancel the cron!
 				manager.cancel(mCronSender);
-				
-				if (callbacks != null) {
-					callbacks.onCronFinished(cron);
-				}
 			}
 		}
 	}

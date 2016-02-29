@@ -30,33 +30,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         mRealm = Realm.getInstance(this);
 
-        Calendar cal = Calendar.getInstance(Locale.getDefault());
-        cal.set(Calendar.HOUR_OF_DAY, 24);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-
-        Cron cron = new Cron.Builder(23)
-                .triggerAtTime(Calendar.getInstance().getTimeInMillis() + 20000)
-                .interval(20000)
-                .create();
-
+//        final Cron cron = new Cron.Builder(23)
+//                .triggerAtTime(Calendar.getInstance().getTimeInMillis() + 20000)
+//                .interval(20000)
+//                .create();
+//
+//        final Cron cron2 = new Cron.Builder()
+//                .triggerAtTime(Calendar.getInstance().getTimeInMillis() + 10000)
+//                .interval(10000)
+//                .create();
+//
+//        final Cron cron3 = new Cron.Builder()
+//                .triggerAtTime(Calendar.getInstance().getTimeInMillis() + 30000)
+//                .interval(30000)
+//                .create();
+//
         CronHandler handler = new CronHandler(this, mRealm);
-        handler.start(cron, new CronHandler.StartCronCallbacks() {
-            @Override
-            public void onCronStarted(Cron cron) {
-                Log.d(TAG, "[onCronStarted] "+ cron.toString());
-            }
+//        handler.start(cron, null);
+//        handler.start(cron2, null);
+//        handler.start(cron3, null);
 
-            @Override
-            public void onCronError(String errorMessage) {
-                Log.d(TAG, "[onCronError] "+errorMessage);
-            }
-        });
-
+        handler.finishAll(null);
     }
 
     @Override
