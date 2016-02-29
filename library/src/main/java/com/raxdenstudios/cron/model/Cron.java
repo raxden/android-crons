@@ -1,14 +1,8 @@
 package com.raxdenstudios.cron.model;
 
 import android.app.AlarmManager;
-import android.util.Log;
-
-import com.raxdenstudios.commons.util.ObjectUtils;
-
-import java.util.Date;
 
 import io.realm.RealmObject;
-import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
 
 public class Cron extends RealmObject {
