@@ -75,8 +75,6 @@ public class CronHandler {
                 if (cron != null) {
                     finishNotPersist(cron);
                     cron.removeFromRealm();
-                } else {
-                    if (callbacks != null) callbacks.onCronError("Cron with "+cronId+" not exists");
                 }
             }
         }, new Realm.Transaction.Callback() {
