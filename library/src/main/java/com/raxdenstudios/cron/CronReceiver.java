@@ -26,7 +26,7 @@ public class CronReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 
-		Realm mRealm = Realm.getInstance(context);
+		Realm mRealm = Realm.getDefaultInstance();
 		RealmResults<Cron> result = mRealm.where(Cron.class).findAll();
 
 		List<Cron> crons = Arrays.asList(result.toArray(new Cron[result.size()]));

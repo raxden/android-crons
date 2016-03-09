@@ -25,7 +25,7 @@ public abstract class CronService extends Service {
     public void onCreate() {
     	super.onCreate();
 
-		mRealm = Realm.getInstance(getApplicationContext());
+        mRealm = Realm.getDefaultInstance();
     }
 
     @Override
