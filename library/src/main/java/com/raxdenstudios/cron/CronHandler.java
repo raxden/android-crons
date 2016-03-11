@@ -12,8 +12,6 @@ import com.raxdenstudios.cron.model.Cron;
 import com.raxdenstudios.cron.util.CronUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,24 +41,24 @@ public class CronHandler {
 	}
 
 	public void start(final Cron cron, final StartCronCallbacks callbacks) {
-		mRealm.executeTransaction(new Realm.Transaction() {
+		mRealm.executeTransactionAsync(new Realm.Transaction() {
 			@Override
 			public void execute(Realm realm) {
-                if (cron.getId() == 0) {
-                    cron.setId(realm.where(Cron.class).max("id").longValue() + 1);
-                }
+				if (cron.getId() == 0) {
+					cron.setId(realm.where(Cron.class).max("id").longValue() + 1);
+				}
 				realm.copyToRealmOrUpdate(cron);
 			}
-		}, new Realm.Transaction.Callback() {
+		}, new Realm.Transaction.OnSuccess() {
 			@Override
 			public void onSuccess() {
-                Log.d(TAG, "==[Cron created]["+cron.getId()+"]===================");
+				Log.d(TAG, "==[Cron created]["+cron.getId()+"]===================");
 				startNotPersist(cron);
-                if (callbacks != null) callbacks.onCronStarted(cron);
+				if (callbacks != null) callbacks.onCronStarted(cron);
 			}
-
+		}, new Realm.Transaction.OnError() {
 			@Override
-			public void onError(Exception e) {
+			public void onError(Throwable e) {
 				Log.e(TAG, e.getMessage(), e);
 				if (callbacks != null) callbacks.onCronError(e.getMessage());
 			}
@@ -68,28 +66,28 @@ public class CronHandler {
 	}
 
 	public void finish(final long cronId, final FinishCronCallbacks callbacks) {
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                final Cron cron = realm.where(Cron.class).equalTo("id", cronId).findFirst();
-                if (cron != null) {
-                    finishNotPersist(cron);
-                    cron.removeFromRealm();
-                }
-            }
-        }, new Realm.Transaction.Callback() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "==[Cron removed]["+cronId+"]===================");
-                if (callbacks != null) callbacks.onCronFinished(cronId);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-                if (callbacks != null) callbacks.onCronError(e.getMessage());
-            }
-        });
+		mRealm.executeTransactionAsync(new Realm.Transaction() {
+			@Override
+			public void execute(Realm realm) {
+				final Cron cron = realm.where(Cron.class).equalTo("id", cronId).findFirst();
+				if (cron != null) {
+					finishNotPersist(cron);
+					cron.removeFromRealm();
+				}
+			}
+		}, new Realm.Transaction.OnSuccess() {
+			@Override
+			public void onSuccess() {
+				Log.d(TAG, "==[Cron removed]["+cronId+"]===================");
+				if (callbacks != null) callbacks.onCronFinished(cronId);
+			}
+		}, new Realm.Transaction.OnError() {
+			@Override
+			public void onError(Throwable e) {
+				Log.e(TAG, e.getMessage(), e);
+				if (callbacks != null) callbacks.onCronError(e.getMessage());
+			}
+		});
 	}
 
 	public void finish(final Cron cron, final FinishCronCallbacks callbacks) {
@@ -98,32 +96,32 @@ public class CronHandler {
 	
 	public void finishAll(final FinishCronCallbacks callbacks) {
 		final List<Long> crons = new ArrayList<>();
-		mRealm.executeTransaction(new Realm.Transaction() {
+		mRealm.executeTransactionAsync(new Realm.Transaction() {
 			@Override
 			public void execute(Realm realm) {
 				RealmResults<Cron> result = realm.where(Cron.class).findAll();
-                if (result.size() == 0) {
-                    if (callbacks != null) callbacks.onCronError("Crons not found.");
-                } else {
-                    Iterator<Cron> iterator = result.iterator();
-                    while (iterator.hasNext()) {
-                        Cron cron = iterator.next();
-                        finishNotPersist(cron);
-                        crons.add(cron.getId());
-                    }
-                    result.clear();
-                }
+				if (result.size() == 0) {
+					if (callbacks != null) callbacks.onCronError("Crons not found.");
+				} else {
+					Iterator<Cron> iterator = result.iterator();
+					while (iterator.hasNext()) {
+						Cron cron = iterator.next();
+						finishNotPersist(cron);
+						crons.add(cron.getId());
+					}
+					result.clear();
+				}
 			}
-		}, new Realm.Transaction.Callback() {
+		}, new Realm.Transaction.OnSuccess() {
 			@Override
 			public void onSuccess() {
-                for (Long cronId : crons) {
-                    if (callbacks != null) callbacks.onCronFinished(cronId);
-                }
+				for (Long cronId : crons) {
+					if (callbacks != null) callbacks.onCronFinished(cronId);
+				}
 			}
-
+		}, new Realm.Transaction.OnError() {
 			@Override
-			public void onError(Exception e) {
+			public void onError(Throwable e) {
 				Log.e(TAG, e.getMessage(), e);
 				if (callbacks != null) callbacks.onCronError(e.getMessage());
 			}
