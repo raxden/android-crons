@@ -1,9 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
 
 group = 'com.raxdenstudios'
-version = '2.3.5'
+version = '2.3.6'
 
 android {
     compileSdkVersion 23
@@ -36,6 +37,10 @@ dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
 
     compile 'com.github.raxden:AndroidCommons:v2.2.4@aar'
+
+    // Parceler library
+    compile 'org.parceler:parceler-api:1.0.4'
+    apt 'org.parceler:parceler:1.0.4'
 }
 
 task sourcesJar(type: Jar) {

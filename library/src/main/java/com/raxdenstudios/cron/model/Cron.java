@@ -2,9 +2,13 @@ package com.raxdenstudios.cron.model;
 
 import android.app.AlarmManager;
 
+import org.parceler.Parcel;
+
+import io.realm.CronRealmProxy;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
+@Parcel(implementations = { CronRealmProxy.class }, value = Parcel.Serialization.BEAN, analyze = { Cron.class })
 public class Cron extends RealmObject {
 
 	@PrimaryKey
