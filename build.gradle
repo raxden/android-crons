@@ -5,9 +5,10 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0-beta4'
+        classpath 'com.android.tools.build:gradle:2.0.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+        classpath "io.realm:realm-gradle-plugin:0.88.3"
     }
 }
 
@@ -19,4 +20,24 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+
+// Define versions in a single place
+ext {
+    // Library version
+    libraryVersion = '2.3.8'
+
+    // Sdk and tools
+    minSdkVersion = 16
+    targetSdkVersion = 22
+    compileSdkVersion = 23
+    buildToolsVersion = '23.0.3'
+
+    // App dependencies
+    parcelerVersion = '1.0.4'
+
+    // Test dependencies
+    junitVersion = '4.12'
+
 }
