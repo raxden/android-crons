@@ -73,7 +73,7 @@ public class CronHandler {
                 Cron cron = realm.where(Cron.class).equalTo("id", cronId).findFirst();
                 if (cron != null) {
                     finishNotPersist(cron);
-                    cron.removeFromRealm();
+                    cron.deleteFromRealm();
                 }
             }
         }, new Realm.Transaction.OnSuccess() {
