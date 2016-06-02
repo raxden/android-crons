@@ -10,7 +10,7 @@
         <!--<service android:name="{YOUR_PACKAGE}.CronService"/>-->
 
         <!-- Notification Receiver -->
-        <receiver android:name="com.raxdenstudios.cron.CronReceiver">
+        <receiver android:name=".receiver.CronReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

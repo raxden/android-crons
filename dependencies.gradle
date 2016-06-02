@@ -1,0 +1,45 @@
+ext {
+
+    // Sdk and tools
+    minSdkVersion = 16
+    targetSdkVersion = 22
+    compileSdkVersion = 23
+    buildToolsVersion = '23.0.3'
+
+    // Library dependencies
+    androidCommons = 'v2.2.4@aar'
+    parcelerVersion = '1.1.4'
+    reactiveAndroidVersion = '1.2.0'
+    reactiveJavaVersion = '1.1.5'
+
+    // Testing
+    robolectricVersion = '3.0'
+    jUnitVersion = '4.12'
+    assertJVersion = '1.7.1'
+    mockitoVersion = '1.10.19'
+
+    androidDependencies = [
+    ]
+
+    firebaseDependencies = [
+    ]
+
+    raxdenStudiosDependencies = [
+            commons:            "com.github.raxden:AndroidCommons:${androidCommons}",
+    ]
+
+    appDependencies = [
+            reactiveAndroid:    "io.reactivex:rxandroid:${reactiveAndroidVersion}",
+            reactiveJava:       "io.reactivex:rxjava:${reactiveJavaVersion}",
+            parceler:           "org.parceler:parceler-api:${parcelerVersion}",
+            parcelerAPT:        "org.parceler:parceler:${parcelerVersion}",
+    ]
+
+    dataTestDependencies = [
+            junit:              "junit:junit:${jUnitVersion}",
+            assertj:            "org.assertj:assertj-core:${assertJVersion}",
+            mockito:            "org.mockito:mockito-core:${mockitoVersion}",
+            robolectric:        "org.robolectric:robolectric:${robolectricVersion}",
+    ]
+
+}

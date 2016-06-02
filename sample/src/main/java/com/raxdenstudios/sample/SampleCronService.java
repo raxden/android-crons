@@ -2,7 +2,7 @@ package com.raxdenstudios.sample;
 
 import android.util.Log;
 
-import com.raxdenstudios.cron.CronService;
+import com.raxdenstudios.cron.service.CronService;
 import com.raxdenstudios.cron.model.Cron;
 
 /**

@@ -1,4 +1,4 @@
-package com.raxdenstudios.cron;
+package com.raxdenstudios.cron.receiver;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

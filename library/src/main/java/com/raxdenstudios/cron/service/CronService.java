@@ -1,4 +1,4 @@
-package com.raxdenstudios.cron;
+package com.raxdenstudios.cron.service;
 
 import android.app.Service;
 import android.content.Intent;
