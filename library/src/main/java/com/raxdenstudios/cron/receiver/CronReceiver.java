@@ -1,6 +1,5 @@
 package com.raxdenstudios.cron.receiver;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,56 +8,65 @@ import android.util.Log;
 
 import com.raxdenstudios.commons.util.ConvertUtils;
 import com.raxdenstudios.commons.util.Utils;
+import com.raxdenstudios.cron.CronHandler;
+import com.raxdenstudios.cron.data.CronDAO;
+import com.raxdenstudios.cron.data.CronDAOImpl;
 import com.raxdenstudios.cron.model.Cron;
-import com.raxdenstudios.cron.util.CronUtils;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
+import rx.Observable;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class CronReceiver extends BroadcastReceiver {
 
     private static final String TAG = CronReceiver.class.getSimpleName();
 
 	@Override
-	public void onReceive(Context context, Intent intent) {
+	public void onReceive(final Context context, Intent intent) {
 
-		Realm mRealm = Realm.getDefaultInstance();
-		RealmResults<Cron> result = mRealm.where(Cron.class).findAll();
-
-		List<Cron> crons = Arrays.asList(result.toArray(new Cron[result.size()]));
-		Log.d(TAG, "[onReceive] "+crons.size() + " crons was found.");
-
-		AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-		long now = Calendar.getInstance().getTimeInMillis();
-
-		for (Cron cron : crons) {
-			long triggerAtTime = cron.getTriggerAtTime();
-			if (triggerAtTime < now) {
-				do {
-					triggerAtTime = triggerAtTime + cron.getInterval();
-				} while (triggerAtTime < now);
-
-				mRealm.beginTransaction();
-				cron.setTriggerAtTime(triggerAtTime);
-				mRealm.commitTransaction();
-
-				PendingIntent mCronSender = initPendingIntent(context, cron);
-				if (mCronSender != null) {
-					// Schedule the cron!
-					alarmManager.cancel(mCronSender);
-					if (cron.getInterval() > 0) {
-						alarmManager.setRepeating(cron.getType(), cron.getTriggerAtTime(), cron.getInterval(), mCronSender);
-					} else {
-						alarmManager.set(cron.getType(), cron.getTriggerAtTime(), mCronSender);
+		final CronDAO cronDAO = new CronDAOImpl(context);
+		cronDAO.findAll()
+				.subscribeOn(Schedulers.immediate())
+				.observeOn(Schedulers.immediate())
+				.map(new Func1<List<Cron>, List<Cron>>() {
+					@Override
+					public List<Cron> call(List<Cron> crons) {
+						long now = Calendar.getInstance().getTimeInMillis();
+						for (Cron cron : crons) {
+							long triggerAtTime = cron.getTriggerAtTime();
+							if (triggerAtTime < now) {
+								do {
+									triggerAtTime = triggerAtTime + cron.getInterval();
+								} while (triggerAtTime < now);
+								cron.setTriggerAtTime(triggerAtTime);
+							}
+						}
+						return crons;
 					}
-					Log.d(TAG, "[onReceive] AlarmManager updated with cron: "+ CronUtils.dump(cron));
-				}
-			}
-		}
+				})
+				.concatMap(new Func1<List<Cron>, Observable<List<Cron>>>() {
+					@Override
+					public Observable<List<Cron>> call(List<Cron> crons) {
+						return cronDAO.updateAll(crons);
+					}
+				})
+				.subscribe(new Action1<List<Cron>>() {
+					@Override
+					public void call(List<Cron> crons) {
+						for (Cron cron : crons) {
+							CronHandler.startNotPersist(context, cron);
+						}
+					}
+				}, new Action1<Throwable>() {
+					@Override
+					public void call(Throwable t) {
+						Log.e(TAG, t.getMessage(), t);
+					}
+				});
 	}
 
 	protected PendingIntent initPendingIntent(Context context, Cron cron) {

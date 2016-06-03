@@ -17,6 +17,7 @@ ext {
     jUnitVersion = '4.12'
     assertJVersion = '1.7.1'
     mockitoVersion = '1.10.19'
+    powermockVersion = '1.6.4'
 
     androidDependencies = [
     ]
@@ -40,6 +41,11 @@ ext {
             assertj:            "org.assertj:assertj-core:${assertJVersion}",
             mockito:            "org.mockito:mockito-core:${mockitoVersion}",
             robolectric:        "org.robolectric:robolectric:${robolectricVersion}",
+            robolectricShadows: "org.robolectric:shadows-support-v4:${robolectricVersion}",
+            powermockJunit:     "org.powermock:powermock-module-junit4:${powermockVersion}",
+            powermockJunitRule: "org.powermock:powermock-module-junit4-rule:${powermockVersion}",
+            powermockAPI:       "org.powermock:powermock-api-mockito:${powermockVersion}",
+            powermockXtream:    "org.powermock:powermock-classloading-xstream:${powermockVersion}"
     ]
 
 }

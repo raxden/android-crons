@@ -15,6 +15,9 @@ android {
     defaultConfig {
         minSdkVersion globalConfiguration.getAt("minSdkVersion")
         targetSdkVersion globalConfiguration.getAt("targetSdkVersion")
+
+        testInstrumentationRunner globalConfiguration.getAt("testInstrumentationRunner")
+        testApplicationId globalConfiguration.getAt("testApplicationId")
     }
 
     buildTypes {
@@ -56,6 +59,22 @@ dependencies {
     compile appDependencies.reactiveJava
     compile appDependencies.parceler
     apt     appDependencies.parcelerAPT
+
+    testCompile  dataTestDependencies.junit
+    testCompile  dataTestDependencies.assertj
+    testCompile  dataTestDependencies.mockito
+    testCompile  dataTestDependencies.robolectric
+    testCompile  dataTestDependencies.robolectricShadows
+    testCompile  dataTestDependencies.powermockJunit
+    testCompile  dataTestDependencies.powermockJunitRule
+    testCompile  dataTestDependencies.powermockAPI
+    testCompile  dataTestDependencies.powermockXtream
+
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    // Set this dependency to use JUnit 4 rules
+    androidTestCompile 'com.android.support.test:rules:0.4.1'
+    // Set this dependency to build and run Espresso tests
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
 }
 
 task sourcesJar(type: Jar) {
