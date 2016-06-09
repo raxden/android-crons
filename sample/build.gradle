@@ -27,14 +27,19 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
+    def raxdenStudiosDependencies = rootProject.ext.raxdenStudiosDependencies
+    def appDependencies = rootProject.ext.appDependencies
+
     compile "com.android.support:appcompat-v7:23.3.0"
     compile "com.android.support:design:23.3.0"
     compile "com.android.support:recyclerview-v7:23.3.0"
-    compile 'com.github.raxden:AndroidCommons:v2.2.4@aar'
 
-    // Parceler library
-    compile "org.parceler:parceler-api:$rootProject.parcelerVersion"
-    apt "org.parceler:parceler:$rootProject.parcelerVersion"
+    compile raxdenStudiosDependencies.commons
+
+    compile appDependencies.reactiveAndroid
+    compile appDependencies.reactiveJava
+    compile appDependencies.parceler
+    apt     appDependencies.parcelerAPT
 
     compile project(':library')
 }

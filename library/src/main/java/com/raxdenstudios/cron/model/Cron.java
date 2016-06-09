@@ -2,7 +2,12 @@ package com.raxdenstudios.cron.model;
 
 import android.app.AlarmManager;
 
+import com.raxdenstudios.commons.util.DateFormatUtils;
+
 import org.parceler.Parcel;
+
+import java.util.Calendar;
+import java.util.Date;
 
 import io.realm.CronRealmProxy;
 import io.realm.RealmObject;
@@ -66,6 +71,14 @@ public class Cron extends RealmObject {
 
 	public void setStatus(boolean status) {
 		this.status = status;
+	}
+
+	@Override
+	public String toString() {
+        String triggerAtTime = DateFormatUtils.dateToString(new Date(getTriggerAtTime()), "dd/MM/yy HH:mm:ss");
+        String intervalInSeconds = ((float)(getInterval() / (1000))) + " seconds";
+        String nextLaunchInSeconds = ((float)((getTriggerAtTime() - Calendar.getInstance().getTimeInMillis()) / (1000))) + " seconds";
+        return "Cron[" + getId() + "][" + isStatus() + "] triggerAtTime " + triggerAtTime + " with interval " + intervalInSeconds + " next launch in " + nextLaunchInSeconds;
 	}
 
 	public static class Builder {

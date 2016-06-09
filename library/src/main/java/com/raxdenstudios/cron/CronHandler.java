@@ -8,16 +8,18 @@ import android.util.Log;
 
 import com.raxdenstudios.commons.util.ConvertUtils;
 import com.raxdenstudios.commons.util.Utils;
-import com.raxdenstudios.cron.data.CronDAO;
-import com.raxdenstudios.cron.data.CronDAOImpl;
+import com.raxdenstudios.cron.data.CronService;
+import com.raxdenstudios.cron.data.factory.CronFactoryService;
 import com.raxdenstudios.cron.model.Cron;
-import com.raxdenstudios.cron.util.CronUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import io.realm.Realm;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.functions.FuncN;
 import rx.schedulers.Schedulers;
 
 public class CronHandler {
@@ -40,19 +42,16 @@ public class CronHandler {
     }
 
 	private Context mContext;
-	private CronDAO mCronDAO;
+	private CronService mCronService;
 
-    public CronHandler(Context context) {
-        this(context, Realm.getDefaultInstance());
-    }
-
-	public CronHandler(Context context, Realm realm) {
+	public CronHandler(Context context) {
 		mContext = context;
-		mCronDAO = new CronDAOImpl(context, realm);
+        mCronService = new CronFactoryService(context);
 	}
 
 	public void start(final Cron cron, final StartCronCallbacks callbacks) {
-        mCronDAO.create(cron)
+        Log.d(TAG, "Prepare to start cron["+cron.getId()+"]");
+        mCronService.save(cron)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Cron>() {
@@ -71,7 +70,7 @@ public class CronHandler {
 	}
 
 	public void finish(final long cronId, final FinishCronCallbacks callbacks) {
-        mCronDAO.remove(cronId)
+        mCronService.delete(cronId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Cron>() {
@@ -90,14 +89,34 @@ public class CronHandler {
     }
 
 	public void finishAll(final FinishAllCronCallbacks callbacks) {
-        mCronDAO.removeAll()
+        mCronService.getAll()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(new Func1<List<Cron>, Observable<List<Cron>>>() {
+                    @Override
+                    public Observable<List<Cron>> call(List<Cron> crons) {
+                        List<Observable<Cron>> obs = new ArrayList<>();
+                        for (Cron cron: crons) {
+                            obs.add(mCronService.delete(cron.getId())
+                                    .subscribeOn(Schedulers.newThread())
+                                    .observeOn(AndroidSchedulers.mainThread()));
+                        }
+                        return Observable.zip(obs, new FuncN<List<Cron>>() {
+                            @Override
+                            public List<Cron> call(Object... args) {
+                                List<Cron> crons = new ArrayList<>();
+                                for (int i = 0; i < args.length; i++) {
+                                    crons.add((Cron)args[i]);
+                                }
+                                return crons;
+                            }
+                        });
+                    }
+                })
                 .subscribe(new Action1<List<Cron>>() {
                     @Override
                     public void call(List<Cron> crons) {
                         for (Cron cron : crons) {
-                            Log.d(TAG, "==[Cron removed]["+cron.getId()+"]===================");
                             finishNotPersist(mContext, cron);
                         }
                         if (callbacks != null) callbacks.onCronsFinished(crons);
@@ -113,10 +132,7 @@ public class CronHandler {
 	
 	public static void startNotPersist(Context context, Cron cron) {
 		if (cron != null && cron.getTriggerAtTime() > 0) {
-            Log.d(TAG, "==[Cron started]["+cron.getId()+"]===================");
-			Log.d(TAG, CronUtils.dump(cron));
-
-			AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            AlarmManager manager = createAlarmManager(context);
 			PendingIntent mCronSender = initPendingIntent(context, cron);
 			
 			if (manager != null && mCronSender != null) {
@@ -128,21 +144,20 @@ public class CronHandler {
 					manager.set(cron.getType(), cron.getTriggerAtTime(), mCronSender);
 				}
 			}
+            Log.d(TAG, "==[Cron started]["+cron.getId()+"]===================");
 		}
 	}
 	
-	public static void finishNotPersist(Context ocntext, Cron cron) {
+	public static void finishNotPersist(Context context, Cron cron) {
 		if (cron != null) {
-			Log.d(TAG, "==[Cron finished]["+cron.getId()+"]===================");
-            Log.d(TAG, CronUtils.dump(cron));
-
-			AlarmManager manager = (AlarmManager) ocntext.getSystemService(Context.ALARM_SERVICE);
-			PendingIntent mCronSender = initPendingIntent(ocntext, cron);
+			AlarmManager manager = createAlarmManager(context);
+			PendingIntent mCronSender = initPendingIntent(context, cron);
 		    
 			if (mCronSender != null) {
 				// Cancel the cron!
 				manager.cancel(mCronSender);
 			}
+            Log.d(TAG, "==[Cron finished]["+cron.getId()+"]===================");
 		}
 	}
 	
@@ -152,5 +167,9 @@ public class CronHandler {
 		intent.putExtra(Cron.class.getSimpleName(), cron.getId());
 		return PendingIntent.getService(context, ConvertUtils.longToInt(cron.getId()), intent, 0);
 	}
+
+    protected static AlarmManager createAlarmManager(Context context) {
+        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    }
 
 }
