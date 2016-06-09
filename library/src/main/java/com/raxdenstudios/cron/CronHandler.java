@@ -8,15 +8,19 @@ import android.util.Log;
 
 import com.raxdenstudios.commons.util.ConvertUtils;
 import com.raxdenstudios.commons.util.Utils;
+import com.raxdenstudios.cron.data.CronService;
+import com.raxdenstudios.cron.data.factory.CronFactoryService;
 import com.raxdenstudios.cron.model.Cron;
-import com.raxdenstudios.cron.util.CronUtils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.functions.FuncN;
+import rx.schedulers.Schedulers;
 
 public class CronHandler {
 
@@ -28,114 +32,108 @@ public class CronHandler {
 	}
 
 	public interface FinishCronCallbacks {
-		void onCronFinished(long cronId);
+		void onCronFinished(Cron cron);
 		void onCronError(String errorMessage);
 	}
-	
+
+    public interface FinishAllCronCallbacks {
+        void onCronsFinished(List<Cron> crons);
+        void onCronsError(String errorMessage);
+    }
+
 	private Context mContext;
-	private Realm mRealm;
-	
-	public CronHandler(Context context, Realm realm) {
+	private CronService mCronService;
+
+	public CronHandler(Context context) {
 		mContext = context;
-		mRealm = realm;
+        mCronService = new CronFactoryService(context);
 	}
 
 	public void start(final Cron cron, final StartCronCallbacks callbacks) {
-        mRealm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                if (cron.getId() == 0) {
-                    Number number = realm.where(Cron.class).max("id");
-                    cron.setId(number != null ? number.longValue() + 1 : 1);
-                }
-                realm.copyToRealmOrUpdate(cron);
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "==[Cron created]["+cron.getId()+"]===================");
-                startNotPersist(cron);
-                if (callbacks != null) callbacks.onCronStarted(cron);
-            }
-        }, new Realm.Transaction.OnError() {
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, e.getMessage(), e);
-                if (callbacks != null) callbacks.onCronError(e.getMessage());
-            }
-        });
+        Log.d(TAG, "Prepare to start cron["+cron.getId()+"]");
+        mCronService.save(cron)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Cron>() {
+                    @Override
+                    public void call(Cron cron) {
+                        startNotPersist(mContext, cron);
+                        if (callbacks != null) callbacks.onCronStarted(cron);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable t) {
+                        Log.e(TAG, t.getMessage(), t);
+                        if (callbacks != null) callbacks.onCronError(t.getMessage());
+                    }
+                });
 	}
 
 	public void finish(final long cronId, final FinishCronCallbacks callbacks) {
-        mRealm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                Cron cron = realm.where(Cron.class).equalTo("id", cronId).findFirst();
-                if (cron != null) {
-                    finishNotPersist(cron);
-                    cron.deleteFromRealm();
-                }
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "==[Cron removed]["+cronId+"]===================");
-                if (callbacks != null) callbacks.onCronFinished(cronId);
-            }
-        }, new Realm.Transaction.OnError() {
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, e.getMessage(), e);
-                if (callbacks != null) callbacks.onCronError(e.getMessage());
-            }
-        });
-	}
-
-	public void finish(final Cron cron, final FinishCronCallbacks callbacks) {
-        finish(cron.getId(), callbacks);
-	}
-	
-	public void finishAll(final FinishCronCallbacks callbacks) {
-		final List<Long> crons = new ArrayList<>();
-        mRealm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                RealmResults<Cron> result = realm.where(Cron.class).findAll();
-                if (result.size() == 0) {
-                    if (callbacks != null) callbacks.onCronError("Crons not found.");
-                } else {
-                    Iterator<Cron> iterator = result.iterator();
-                    while (iterator.hasNext()) {
-                        Cron cron = iterator.next();
-                        finishNotPersist(cron);
-                        crons.add(cron.getId());
+        mCronService.delete(cronId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Cron>() {
+                    @Override
+                    public void call(Cron cron) {
+                        finishNotPersist(mContext, cron);
+                        if (callbacks != null) callbacks.onCronFinished(cron);
                     }
-                    result.clear();
-                }
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
-                for (Long cronId : crons) {
-                    if (callbacks != null) callbacks.onCronFinished(cronId);
-                }
-            }
-        }, new Realm.Transaction.OnError() {
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, e.getMessage(), e);
-                if (callbacks != null) callbacks.onCronError(e.getMessage());
-            }
-        });
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable t) {
+                        Log.e(TAG, t.getMessage(), t);
+                        if (callbacks != null) callbacks.onCronError(t.getMessage());
+                    }
+                });
+    }
+
+	public void finishAll(final FinishAllCronCallbacks callbacks) {
+        mCronService.getAll()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(new Func1<List<Cron>, Observable<List<Cron>>>() {
+                    @Override
+                    public Observable<List<Cron>> call(List<Cron> crons) {
+                        List<Observable<Cron>> obs = new ArrayList<>();
+                        for (Cron cron: crons) {
+                            obs.add(mCronService.delete(cron.getId())
+                                    .subscribeOn(Schedulers.newThread())
+                                    .observeOn(AndroidSchedulers.mainThread()));
+                        }
+                        return Observable.zip(obs, new FuncN<List<Cron>>() {
+                            @Override
+                            public List<Cron> call(Object... args) {
+                                List<Cron> crons = new ArrayList<>();
+                                for (int i = 0; i < args.length; i++) {
+                                    crons.add((Cron)args[i]);
+                                }
+                                return crons;
+                            }
+                        });
+                    }
+                })
+                .subscribe(new Action1<List<Cron>>() {
+                    @Override
+                    public void call(List<Cron> crons) {
+                        for (Cron cron : crons) {
+                            finishNotPersist(mContext, cron);
+                        }
+                        if (callbacks != null) callbacks.onCronsFinished(crons);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable t) {
+                        Log.e(TAG, t.getMessage(), t);
+                        if (callbacks != null) callbacks.onCronsError(t.getMessage());
+                    }
+                });
 	}	
 	
-	public void startNotPersist(Cron cron) {
+	public static void startNotPersist(Context context, Cron cron) {
 		if (cron != null && cron.getTriggerAtTime() > 0) {
-            Log.d(TAG, "==[Cron started]["+cron.getId()+"]===================");
-			Log.d(TAG, CronUtils.dump(cron));
-
-			AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-			PendingIntent mCronSender = initPendingIntent(mContext, cron);
+            AlarmManager manager = createAlarmManager(context);
+			PendingIntent mCronSender = initPendingIntent(context, cron);
 			
 			if (manager != null && mCronSender != null) {
 			    // Schedule the cron!
@@ -146,29 +144,32 @@ public class CronHandler {
 					manager.set(cron.getType(), cron.getTriggerAtTime(), mCronSender);
 				}
 			}
+            Log.d(TAG, "==[Cron started]["+cron.getId()+"]===================");
 		}
 	}
 	
-	public void finishNotPersist(Cron cron) {
+	public static void finishNotPersist(Context context, Cron cron) {
 		if (cron != null) {
-			Log.d(TAG, "==[Cron finished]["+cron.getId()+"]===================");
-            Log.d(TAG, CronUtils.dump(cron));
-
-			AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-			PendingIntent mCronSender = initPendingIntent(mContext, cron);
+			AlarmManager manager = createAlarmManager(context);
+			PendingIntent mCronSender = initPendingIntent(context, cron);
 		    
 			if (mCronSender != null) {
 				// Cancel the cron!
 				manager.cancel(mCronSender);
 			}
+            Log.d(TAG, "==[Cron finished]["+cron.getId()+"]===================");
 		}
 	}
 	
-	protected PendingIntent initPendingIntent(Context context, Cron cron) {
+	protected static PendingIntent initPendingIntent(Context context, Cron cron) {
 		Intent intent = new Intent();
         intent.setAction(Utils.getPackageName(context)+".CRON");
 		intent.putExtra(Cron.class.getSimpleName(), cron.getId());
 		return PendingIntent.getService(context, ConvertUtils.longToInt(cron.getId()), intent, 0);
 	}
+
+    protected static AlarmManager createAlarmManager(Context context) {
+        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    }
 
 }
