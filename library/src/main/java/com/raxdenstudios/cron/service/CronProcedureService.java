@@ -16,7 +16,6 @@ import java.util.Calendar;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -63,12 +62,6 @@ public abstract class CronProcedureService extends Service {
                         @Override
                         public Boolean call(Cron cron) {
                             return cron.isStatus();
-                        }
-                    })
-                    .doAfterTerminate(new Action0() {
-                        @Override
-                        public void call() {
-                            stopSelf();
                         }
                     })
                     .subscribe(new Action1<Cron>() {
