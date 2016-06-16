@@ -3,7 +3,6 @@ package com.raxdenstudios.cron.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -17,6 +16,7 @@ import java.util.Calendar;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -39,7 +39,7 @@ public abstract class CronProcedureService extends Service {
 
         Log.d(TAG, "CronProcedureService started....");
 
-        long cronId = getCrongIdFromExtras(intent.getExtras());
+        long cronId = getCrongIdFromExtras(intent);
         if (cronId > 0) {
             mCronService.getById(cronId)
                     .subscribeOn(Schedulers.newThread())
@@ -63,6 +63,12 @@ public abstract class CronProcedureService extends Service {
                         @Override
                         public Boolean call(Cron cron) {
                             return cron.isStatus();
+                        }
+                    })
+                    .doAfterTerminate(new Action0() {
+                        @Override
+                        public void call() {
+                            stopSelf();
                         }
                     })
                     .subscribe(new Action1<Cron>() {
@@ -107,11 +113,11 @@ public abstract class CronProcedureService extends Service {
         }
     };
 
-    private long getCrongIdFromExtras(Bundle extras) {
+    private long getCrongIdFromExtras(Intent intent) {
         long cronId = 0;
-        if (extras != null && extras.containsKey(Cron.class.getSimpleName())) {
+        if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(Cron.class.getSimpleName())) {
             try {
-                cronId = extras.getLong(Cron.class.getSimpleName());
+                cronId = intent.getExtras().getLong(Cron.class.getSimpleName());
             } catch (NumberFormatException e) {
                 Log.e(TAG, e.getMessage(), e);
             }
