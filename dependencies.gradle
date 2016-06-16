@@ -7,7 +7,7 @@ ext {
     buildToolsVersion = '23.0.3'
 
     // Library dependencies
-    androidCommons = 'v2.2.4@aar'
+    androidCommons = 'v2.2.5@aar'
     parcelerVersion = '1.1.4'
     reactiveAndroidVersion = '1.2.0'
     reactiveJavaVersion = '1.1.5'

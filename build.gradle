@@ -19,7 +19,7 @@ allprojects {
     allprojects {
         ext {
             androidGroup = 'com.raxdenstudios'
-            androidVersionLibrary = "2.4.2"
+            androidVersionLibrary = "2.5.3"
             testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
             testApplicationId = 'com.raxdenstudios.cron.test'
         }
