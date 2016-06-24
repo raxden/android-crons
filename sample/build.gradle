@@ -27,14 +27,19 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-    compile deps.androidv7
-    compile deps.androidDesign
-    compile deps.playServices
-    compile deps.androidCommons
-    compile deps.parceler
-    compile deps.parcelerAPI
-    compile deps.reactiveAndroidVersion
-    compile deps.reactiveJavaVersion
+    def raxdenStudiosDependencies = rootProject.ext.raxdenStudiosDependencies
+    def appDependencies = rootProject.ext.appDependencies
 
-    compile project(':crons')
+    compile "com.android.support:appcompat-v7:23.3.0"
+    compile "com.android.support:design:23.3.0"
+    compile "com.android.support:recyclerview-v7:23.3.0"
+
+    compile raxdenStudiosDependencies.commons
+
+    compile appDependencies.reactiveAndroid
+    compile appDependencies.reactiveJava
+    compile appDependencies.parceler
+    apt     appDependencies.parcelerAPT
+
+    compile project(':library')
 }
