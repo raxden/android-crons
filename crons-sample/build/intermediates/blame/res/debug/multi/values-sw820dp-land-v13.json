@@ -1,0 +1,45 @@
+[
+    {
+        "outputFile": "C:\\Users\\Raxden\\workspace\\libraries\\AndroidCrons\\crons-sample\\build\\intermediates\\res\\merged\\debug\\values-sw820dp-land-v13\\values-sw820dp-land-v13.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 40,
+                    "endOffset": 91
+                },
+                "from": {
+                    "file": "C:\\Users\\Raxden\\workspace\\libraries\\AndroidCrons\\crons-sample\\build\\intermediates\\exploded-aar\\com.github.raxden\\AndroidCommons\\2.2.6\\res\\values-sw820dp-land-v13\\values-sw820dp-land-v13.xml",
+                    "position": {
+                        "startLine": 2,
+                        "startColumn": 4,
+                        "startOffset": 55,
+                        "endColumn": 40,
+                        "endOffset": 91
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 3,
+                    "startColumn": 4,
+                    "startOffset": 96,
+                    "endColumn": 37,
+                    "endOffset": 129
+                },
+                "from": {
+                    "file": "C:\\Users\\Raxden\\workspace\\libraries\\AndroidCrons\\crons-sample\\build\\intermediates\\exploded-aar\\com.github.raxden\\AndroidCommons\\2.2.6\\res\\values-sw820dp-land-v13\\values-sw820dp-land-v13.xml",
+                    "position": {
+                        "startLine": 3,
+                        "startColumn": 4,
+                        "startOffset": 96,
+                        "endColumn": 37,
+                        "endOffset": 129
+                    }
+                }
+            }
+        ]
+    }
+]

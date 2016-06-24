@@ -19,7 +19,11 @@ repositories {
 }
 
 dependencies {
+<<<<<<< HEAD
 	    compile 'com.github.raxden:AndroidCrons:2.5.6@aar'
+=======
+	    compile 'com.github.raxden:AndroidCrons:v2.5.0@aar'
+>>>>>>> e8fdc09a34a08e714ac6f80eeecbba04508a2b60
 }
 ```
 
@@ -34,7 +38,11 @@ dependencies {
 <dependency>
 	    <groupId>com.github.raxden</groupId>
 	    <artifactId>AndroidCrons</artifactId>
+<<<<<<< HEAD
 	    <version>2.5.6</version>
+=======
+	    <version>v2.5.0</version>
+>>>>>>> e8fdc09a34a08e714ac6f80eeecbba04508a2b60
 </dependency>
 ```
 
@@ -44,6 +52,10 @@ dependencies {
 
 ### Documentation 
 
+<<<<<<< HEAD
 For a **detailed documentation**, please have a look at the [**Wiki**](https://github.com/raxden/AndroidCrons/wiki) or the [**Javadocs**](https://jitpack.io/com/github/raxden/AndroidCrons/2.5.6/javadoc/).
+=======
+For a **detailed documentation**, please have a look at the [**Wiki**](https://github.com/raxden/AndroidCrons/wiki) or the [**Javadocs**](https://jitpack.io/com/github/raxden/AndroidCrons/v2.5.0/javadoc/).
+>>>>>>> e8fdc09a34a08e714ac6f80eeecbba04508a2b60
 
 Furthermore, you can also rely on the [**Sample**](https://github.com/raxden/AndroidCrons/tree/master/sample). folder and check out the example code in that project.
