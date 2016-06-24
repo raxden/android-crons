@@ -1,10 +1,5 @@
 ext {
 
-    // Sdk and tools
-    minSdkVersion = 16
-    targetSdkVersion = 22
-    compileSdkVersion = 23
-    buildToolsVersion = '23.0.3'
 
     // Library dependencies
     androidCommons = 'v2.2.4@aar'

@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'realm-android'
+
+group = GROUP
+version = VERSION
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+    }
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: '*.jar')
+    testCompile deps.junit
+    testCompile deps.asserj
+    testCompile deps.robolectric
+
+    compile deps.androidv7
+    compile deps.playServices
+    compile deps.androidCommons
+    compile deps.parceler
+    compile deps.parcelerAPI
+    compile deps.reactiveAndroidVersion
+    compile deps.reactiveJavaVersion
+}
+
+apply from: 'build_javadoc.gradle'
