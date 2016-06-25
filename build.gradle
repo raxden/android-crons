@@ -33,7 +33,7 @@ ext {
     // App dependencies
     supportLibraryVersion = '24.0.0'
     playServicesVersion = '8.4.0'
-    androidCommons = '2.2.6'            // https://github.com/raxden/AndroidCommons
+    androidCommonsVersion = '2.2.6'     // https://github.com/raxden/AndroidCommons
     parcelerVersion = '1.1.4'           // https://github.com/johncarl81/parceler
     reactiveAndroidVersion = '1.2.1'    // https://github.com/ReactiveX/RxAndroid
     reactiveJavaVersion = '1.1.6'       // https://github.com/ReactiveX/RxAndroid
@@ -51,7 +51,7 @@ ext.deps = [
     playServices:       "com.google.android.gms:play-services:$playServicesVersion",
 
     // Third Party
-    androidCommons:         "com.github.raxden:AndroidCommons:${androidCommons}",
+    androidCommons:         "com.github.raxden:AndroidCommons:${androidCommonsVersion}",
     parceler:               "org.parceler:parceler:${parcelerVersion}",
     parcelerAPI:            "org.parceler:parceler-api:${parcelerVersion}",
     reactiveAndroidVersion: "io.reactivex:rxandroid:${reactiveAndroidVersion}",
