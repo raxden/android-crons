@@ -29,7 +29,6 @@ dependencies {
 
     compile deps.androidv7
     compile deps.androidDesign
-    compile deps.playServices
     compile deps.androidCommons
     compile deps.parceler
     compile deps.parcelerAPI

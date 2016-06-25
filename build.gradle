@@ -32,8 +32,7 @@ ext {
 
     // App dependencies
     supportLibraryVersion = '24.0.0'
-    playServicesVersion = '8.4.0'
-    androidCommonsVersion = '2.2.6'     // https://github.com/raxden/AndroidCommons
+    androidCommonsVersion = '2.2.7@aar' // https://github.com/raxden/AndroidCommons
     parcelerVersion = '1.1.4'           // https://github.com/johncarl81/parceler
     reactiveAndroidVersion = '1.2.1'    // https://github.com/ReactiveX/RxAndroid
     reactiveJavaVersion = '1.1.6'       // https://github.com/ReactiveX/RxAndroid
@@ -48,7 +47,6 @@ ext.deps = [
     // Android
     androidv7:          "com.android.support:appcompat-v7:$supportLibraryVersion",
     androidDesign:      "com.android.support:design:$supportLibraryVersion",
-    playServices:       "com.google.android.gms:play-services:$playServicesVersion",
 
     // Third Party
     androidCommons:         "com.github.raxden:AndroidCommons:${androidCommonsVersion}",
@@ -56,6 +54,8 @@ ext.deps = [
     parcelerAPI:            "org.parceler:parceler-api:${parcelerVersion}",
     reactiveAndroidVersion: "io.reactivex:rxandroid:${reactiveAndroidVersion}",
     reactiveJavaVersion:    "io.reactivex:rxjava:${reactiveJavaVersion}",
+
+    // Testing
     junit:                  "junit:junit:${jUnitVersion}",
     asserj:                 "org.assertj:assertj-core:${assertJVersion}",
     robolectric:            "org.robolectric:robolectric:${roboelectricVersion}"
