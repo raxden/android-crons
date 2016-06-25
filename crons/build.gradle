@@ -27,7 +27,6 @@ dependencies {
     testCompile deps.robolectric
 
     compile deps.androidv7
-    compile deps.playServices
     compile deps.androidCommons
     compile deps.parceler
     compile deps.parcelerAPI
