@@ -3,7 +3,7 @@ Android Crons
 
 Android Crons is a util library that allows use crons on Android. Works on Android 4.1 (API level 16) and upwards.
 
-[![Release](https://img.shields.io/github/tag/raxden/AndroidCrons.svg?label=maven central)](https://jitpack.io/#raxden/AndroidCrons/) 
+[![Release](https://img.shields.io/github/tag/raxden/AndroidCrons.svg?label=Download)](https://jitpack.io/#raxden/AndroidCrons/) 
 [![API](https://img.shields.io/badge/API-16%2B-green.svg?style=flat)](https://android-arsenal.com/api?level=16)
 
 ## Usage
