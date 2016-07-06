@@ -3,8 +3,8 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
 
-group = GROUP
-version = VERSION
+group = GROUP_NAME
+version = LIBRARY_VERSION
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
