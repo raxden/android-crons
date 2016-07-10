@@ -20,6 +20,12 @@ repositories {
 
 dependencies {
 	    compile 'com.github.raxden:AndroidCrons:2.5.8@aar'
+	    
+        compile 'com.github.raxden:AndroidCommons::2.2.7@aar'
+        compile 'org.parceler:parceler:1.1.4'
+        compile 'org.parceler:parceler-api:1.1.4' 
+        compile 'io.reactivex:rxandroid:1.2.1'
+        compile 'io.reactivex:rxjava:1.1.6'
 }
 ```
 
