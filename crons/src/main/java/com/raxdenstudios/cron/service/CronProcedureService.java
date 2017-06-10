@@ -38,8 +38,7 @@ public abstract class CronProcedureService extends Service {
     	super.onStartCommand(intent, flags, startId);
 
         Log.d(TAG, "CronProcedureService started....");
-
-        long cronId = getCrongIdFromExtras(intent.getExtras());
+        long cronId = getCronIdFromIntent(intent);
         if (cronId > 0) {
             mCronService.getById(cronId)
                     .subscribeOn(Schedulers.newThread())
@@ -83,9 +82,9 @@ public abstract class CronProcedureService extends Service {
 
         return START_STICKY;
     }
-    
+
 	protected abstract void onCronLaunched(Cron cron);
-    
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -107,13 +106,16 @@ public abstract class CronProcedureService extends Service {
         }
     };
 
-    private long getCrongIdFromExtras(Bundle extras) {
+    private long getCronIdFromIntent(Intent intent) {
         long cronId = 0;
-        if (extras != null && extras.containsKey(Cron.class.getSimpleName())) {
-            try {
-                cronId = extras.getLong(Cron.class.getSimpleName());
-            } catch (NumberFormatException e) {
-                Log.e(TAG, e.getMessage(), e);
+        if (intent != null) {
+            Bundle extras = intent.getExtras();
+            if (extras != null && extras.containsKey(Cron.class.getSimpleName())) {
+                try {
+                    cronId = extras.getLong(Cron.class.getSimpleName());
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
             }
         }
         return cronId;

@@ -1,0 +1,48 @@
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+ext {
+
+    // Sdk and tools
+    minSdkVersion = 16
+    targetSdkVersion = 24
+    compileSdkVersion = 24
+    buildToolsVersion = '25.0.2'
+
+    // Android dependencies
+    supportLibraryVersion = '25.2.0'
+    servicesVersion = '10.0.0'
+
+    // Libraries
+    reactiveAndroidVersion = '1.2.1'        // https://github.com/ReactiveX/RxAndroid
+    reactiveJavaVersion = '1.1.6'           // https://github.com/ReactiveX/RxAndroid
+    parcelerVersion = '1.1.8'               // https://github.com/johncarl81/parceler
+
+    // Testing
+    jUnitVersion = '4.12'
+    assertJVersion = '1.7.0'
+    robolectricVersion = '3.0'
+    mockitoVersion = '1.10.19'
+
+    libraryDependencies = [
+            compile    : [
+                    "com.android.support:appcompat-v7:${supportLibraryVersion}",
+                    "io.reactivex:rxandroid:${reactiveAndroidVersion}",
+                    "io.reactivex:rxjava:${reactiveJavaVersion}",
+                    "org.parceler:parceler-api:${parcelerVersion}"
+            ],
+            apt        : [
+                    "org.parceler:parceler:${parcelerVersion}"
+            ],
+            testCompile: [
+                    "junit:junit:${jUnitVersion}",
+                    "org.assertj:assertj-core:${assertJVersion}",
+                    "org.mockito:mockito-core:${mockitoVersion}",
+                    "org.robolectric:robolectric:${robolectricVersion}"
+            ]
+    ]
+
+}

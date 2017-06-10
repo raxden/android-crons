@@ -26,14 +26,9 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-
-    compile deps.androidv7
-    compile deps.androidDesign
-    compile deps.androidCommons
-    compile deps.parceler
-    compile deps.parcelerAPI
-    compile deps.reactiveAndroidVersion
-    compile deps.reactiveJavaVersion
+    compile 'com.android.support:support-v13:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
 
     compile project(':crons')
 }
