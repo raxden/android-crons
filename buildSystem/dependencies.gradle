@@ -1,6 +1,7 @@
 allprojects {
     repositories {
         jcenter()
+        maven { url "https://jitpack.io" }
     }
 }
 
@@ -17,6 +18,7 @@ ext {
     servicesVersion = '10.0.0'
 
     // Libraries
+    androidCommonsVersion = '3.0.9@aar'     // https://github.com/raxden/AndroidCommons
     reactiveAndroidVersion = '1.2.1'        // https://github.com/ReactiveX/RxAndroid
     reactiveJavaVersion = '1.1.6'           // https://github.com/ReactiveX/RxAndroid
     parcelerVersion = '1.1.8'               // https://github.com/johncarl81/parceler
@@ -29,6 +31,7 @@ ext {
 
     libraryDependencies = [
             compile    : [
+                    "com.github.raxden:AndroidCommons:${androidCommonsVersion}",
                     "com.android.support:appcompat-v7:${supportLibraryVersion}",
                     "io.reactivex:rxandroid:${reactiveAndroidVersion}",
                     "io.reactivex:rxjava:${reactiveJavaVersion}",
