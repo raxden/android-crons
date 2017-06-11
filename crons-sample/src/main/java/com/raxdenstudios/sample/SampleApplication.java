@@ -20,7 +20,8 @@ public class SampleApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        RealmConfiguration config = new RealmConfiguration.Builder(this)
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration.Builder()
                 .name(Utils.getPackageName(this))
                 .modules(Realm.getDefaultModule(), new CronRealmModule())
                 .migration(new CronRealmMigration())

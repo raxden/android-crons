@@ -57,9 +57,7 @@ public class CronBootReceiver extends BroadcastReceiver {
 					public Observable<List<Cron>> call(List<Cron> crons) {
                         List<Observable<Cron>> obs = new ArrayList<>();
                         for (Cron cron: crons) {
-                            obs.add(cronService.save(cron)
-                                    .subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread()));
+                            obs.add(cronService.save(cron).subscribeOn(Schedulers.newThread()));
                         }
                         return Observable.zip(obs, new FuncN<List<Cron>>() {
                             @Override

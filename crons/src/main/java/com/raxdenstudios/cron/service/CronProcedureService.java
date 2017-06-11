@@ -53,9 +53,7 @@ public abstract class CronProcedureService extends Service {
                     .concatMap(new Func1<Cron, Observable<Cron>>() {
                         @Override
                         public Observable<Cron> call(Cron cron) {
-                            return mCronService.save(cron)
-                                    .subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread());
+                            return mCronService.save(cron).subscribeOn(Schedulers.newThread());
                         }
                     })
                     .filter(new Func1<Cron, Boolean>() {
@@ -67,7 +65,7 @@ public abstract class CronProcedureService extends Service {
                     .subscribe(new Action1<Cron>() {
                         @Override
                         public void call(Cron cron) {
-                            Log.d(TAG, "Cron launched! " + cron.toString());
+                            Log.d(TAG, "Cron launched!");
                             onCronLaunched(cron);
                             Log.d(TAG, "CronProcedureService finished....");
                         }

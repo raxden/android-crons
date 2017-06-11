@@ -4,10 +4,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
-import com.raxdenstudios.commons.util.ConvertUtils;
-import com.raxdenstudios.commons.util.Utils;
 import com.raxdenstudios.cron.data.CronService;
 import com.raxdenstudios.cron.data.factory.CronFactoryService;
 import com.raxdenstudios.cron.model.Cron;
@@ -97,9 +97,7 @@ public class CronHandler {
                     public Observable<List<Cron>> call(List<Cron> crons) {
                         List<Observable<Cron>> obs = new ArrayList<>();
                         for (Cron cron: crons) {
-                            obs.add(mCronService.delete(cron.getId())
-                                    .subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread()));
+                            obs.add(mCronService.delete(cron.getId()).subscribeOn(Schedulers.newThread()));
                         }
                         return Observable.zip(obs, new FuncN<List<Cron>>() {
                             @Override
@@ -163,13 +161,31 @@ public class CronHandler {
 	
 	protected static PendingIntent initPendingIntent(Context context, Cron cron) {
 		Intent intent = new Intent();
-        intent.setAction(Utils.getPackageName(context)+".CRON");
+        intent.setAction(getPackageName(context)+".CRON");
 		intent.putExtra(Cron.class.getSimpleName(), cron.getId());
-		return PendingIntent.getService(context, ConvertUtils.longToInt(cron.getId()), intent, 0);
+		return PendingIntent.getService(context, longToInt(cron.getId()), intent, 0);
 	}
 
     protected static AlarmManager createAlarmManager(Context context) {
         return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    }
+
+    private static int longToInt(long value) {
+        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException (value + " cannot be cast to int without changing its value.");
+        }
+        return (int) value;
+    }
+
+    private static String getPackageName(Context context) {
+        String packageName = "";
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            packageName = pInfo.packageName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+        return packageName;
     }
 
 }

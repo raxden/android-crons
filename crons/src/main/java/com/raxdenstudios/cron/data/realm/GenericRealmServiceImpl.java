@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.raxdenstudios.cron.data.GenericService;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 
@@ -14,7 +13,6 @@ import io.realm.RealmModel;
 import io.realm.RealmObject;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.annotations.PrimaryKey;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -44,7 +42,7 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
                     public void execute(Realm realm) {
                         try {
                             RealmResults<T> managedResults = realm.where(mPersistentClass).findAll();
-                            Log.d(TAG, "==["+managedResults.size()+" "+mPersistentClass.getSimpleName()+"'s founded]==");
+                            Log.d(TAG, "==[" + managedResults.size() + " " + mPersistentClass.getSimpleName() + "'s founded]==");
                             observer.onNext(realm.copyFromRealm(managedResults));
                             observer.onCompleted();
                         } catch (IllegalArgumentException e) {
@@ -74,7 +72,8 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
                                 T managedData = query.findFirst();
                                 if (managedData != null) {
                                     data = realm.copyFromRealm(managedData);
-                                    Log.d(TAG, "==[Cron founded]== "+data.toString());
+                                    Log.d(TAG, "==[Cron founded]==");
+                                    Log.d(TAG, data.toString());
                                 }
                             }
                             observer.onNext(data);
@@ -101,7 +100,8 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
                     public void execute(Realm realm) {
                         try {
                             T manageData = realm.copyToRealmOrUpdate(object);
-                            Log.d(TAG, "==["+object.toString()+" "+mPersistentClass.getSimpleName()+" saved]==");
+                            Log.d(TAG, "==[" + mPersistentClass.getSimpleName() + " saved]==");
+                            Log.d(TAG, object.toString());
                             observer.onNext(object);
                             observer.onCompleted();
                         } catch (IllegalArgumentException e) {
@@ -130,7 +130,7 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
                             if (query != null) {
                                 T managedData = query.findFirst();
                                 if (managedData != null) {
-                                    Log.d(TAG, "==["+mPersistentClass.getSimpleName()+" deleted]==");
+                                    Log.d(TAG, "==[" + mPersistentClass.getSimpleName() + " deleted]==");
                                     ((RealmObject) managedData).deleteFromRealm();
                                 }
                             }
@@ -148,7 +148,7 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
     }
 
     private RealmQuery<T> createQuery(Realm realm, Class<T> persistenceClass, ID id) {
-        String fieldName = getPrimaryKeyFieldName(persistenceClass);
+        String fieldName = getPrimaryKeyFieldName(realm, persistenceClass);
         if (fieldName != null) {
             if (id instanceof String) {
                 return realm.where(persistenceClass).equalTo(fieldName, (String) id);
@@ -173,12 +173,8 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
         return null;
     }
 
-    private String getPrimaryKeyFieldName(Class<T> persistentClass) {
-        for(Field field  : persistentClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(PrimaryKey.class)) {
-                return field.getName();
-            }
-        }
-        return null;
+    private String getPrimaryKeyFieldName(Realm realm, Class<T> persistentClass) {
+        return realm.getSchema().get(persistentClass.getSimpleName()).getPrimaryKey();
     }
+
 }

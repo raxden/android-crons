@@ -40,7 +40,8 @@ public class CronRealmServiceImpl extends GenericRealmServiceImpl<Cron, Long> im
                                 cron.setId(id);
                             }
                             Cron manageData = realm.copyToRealmOrUpdate(cron);
-                            Log.d(TAG, "==[Cron saved]== "+cron.toString());
+                            Log.d(TAG, "==[Cron saved]== ");
+                            Log.d(TAG, cron.toString());
                             observer.onNext(cron);
                             observer.onCompleted();
                         } catch (IllegalArgumentException e) {
