@@ -1,191 +1,138 @@
 package com.raxdenstudios.cron;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.raxdenstudios.cron.data.CronService;
 import com.raxdenstudios.cron.data.factory.CronFactoryService;
 import com.raxdenstudios.cron.model.Cron;
+import com.raxdenstudios.cron.utils.CronUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.functions.FuncN;
-import rx.schedulers.Schedulers;
+import io.reactivex.Completable;
+import io.reactivex.CompletableSource;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 public class CronHandler {
 
     private static final String TAG = CronHandler.class.getSimpleName();
 
-	public interface StartCronCallbacks {
-		void onCronStarted(Cron cron);
-		void onCronError(String errorMessage);
-	}
+    private final Context context;
+    private final CronService cronService;
 
-	public interface FinishCronCallbacks {
-		void onCronFinished(Cron cron);
-		void onCronError(String errorMessage);
-	}
-
-    public interface FinishAllCronCallbacks {
-        void onCronsFinished(List<Cron> crons);
-        void onCronsError(String errorMessage);
+    public CronHandler(Context context) {
+        this.context = context;
+        this.cronService = new CronFactoryService(context);
     }
 
-	private Context mContext;
-	private CronService mCronService;
-
-	public CronHandler(Context context) {
-		mContext = context;
-        mCronService = new CronFactoryService(context);
-	}
-
-	public void start(final Cron cron, final StartCronCallbacks callbacks) {
-        Log.d(TAG, "Prepare to start cron["+cron.getId()+"]");
-        mCronService.save(cron)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Cron>() {
-                    @Override
-                    public void call(Cron cron) {
-                        startNotPersist(mContext, cron);
-                        if (callbacks != null) callbacks.onCronStarted(cron);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable t) {
-                        Log.e(TAG, t.getMessage(), t);
-                        if (callbacks != null) callbacks.onCronError(t.getMessage());
-                    }
-                });
-	}
-
-	public void finish(final long cronId, final FinishCronCallbacks callbacks) {
-        mCronService.delete(cronId)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Cron>() {
-                    @Override
-                    public void call(Cron cron) {
-                        finishNotPersist(mContext, cron);
-                        if (callbacks != null) callbacks.onCronFinished(cron);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable t) {
-                        Log.e(TAG, t.getMessage(), t);
-                        if (callbacks != null) callbacks.onCronError(t.getMessage());
-                    }
-                });
+    public CronHandler(Context context, CronService cronService) {
+        this.context = context;
+        this.cronService = cronService;
     }
 
-	public void finishAll(final FinishAllCronCallbacks callbacks) {
-        mCronService.getAll()
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(new Func1<List<Cron>, Observable<List<Cron>>>() {
+    public Completable start(final Cron cron) {
+        return cronService.save(cron)
+                .map(new Function<Cron, Cron>() {
                     @Override
-                    public Observable<List<Cron>> call(List<Cron> crons) {
-                        List<Observable<Cron>> obs = new ArrayList<>();
-                        for (Cron cron: crons) {
-                            obs.add(mCronService.delete(cron.getId()).subscribeOn(Schedulers.newThread()));
+                    public Cron apply(Cron cron) throws Exception {
+                        CronUtils.setAlarmManager(context, cron);
+                        return cron;
+                    }
+                })
+                .doOnSuccess(new Consumer<Cron>() {
+                    @Override
+                    public void accept(Cron cron) throws Exception {
+                        Log.d(TAG, "Cron[" + cron.getId() + "] started at " + CronUtils.currentDateTime() + " with interval " + CronUtils.intervalInSeconds(cron) + ". Next launch in " + CronUtils.nextLaunchInSeconds(cron) + " " + CronUtils.triggerAtTime(cron));
+                    }
+                })
+                .toCompletable();
+    }
+
+    public Completable finish(final long cronId) {
+        return cronService.get(cronId)
+                .flatMap(new Function<Cron, SingleSource<Cron>>() {
+                    @Override
+                    public SingleSource<Cron> apply(Cron cron) throws Exception {
+                        CronUtils.cancelAlarmManager(context, cron);
+                        return cronService.delete(cron.getId()).toSingleDefault(cron);
+                    }
+                })
+                .doOnSuccess(new Consumer<Cron>() {
+                    @Override
+                    public void accept(Cron cron) throws Exception {
+                        Log.d(TAG, "Cron[" + cron.getId() + "] finished at " + CronUtils.currentDateTime());
+                    }
+                })
+                .toCompletable();
+    }
+
+    public Completable startAll() {
+        return cronService.getAll()
+                .map(new Function<List<Cron>, List<Cron>>() {
+                    @Override
+                    public List<Cron> apply(List<Cron> crons) throws Exception {
+                        long now = Calendar.getInstance().getTimeInMillis();
+                        for (Cron cron : crons) {
+                            long triggerAtTime = cron.getTriggerAtTime();
+                            if (triggerAtTime < now) {
+                                do {
+                                    triggerAtTime = triggerAtTime + cron.getInterval();
+                                } while (triggerAtTime < now);
+                                cron.setTriggerAtTime(triggerAtTime);
+                            }
                         }
-                        return Observable.zip(obs, new FuncN<List<Cron>>() {
+                        return crons;
+                    }
+                })
+                .flatMapCompletable(new Function<List<Cron>, CompletableSource>() {
+                    @Override
+                    public CompletableSource apply(List<Cron> crons) throws Exception {
+                        List<Single<Cron>> obs = new ArrayList<>();
+                        for (Cron cron : crons) {
+                            obs.add(start(cron).toSingleDefault(cron).subscribeOn(Schedulers.newThread()));
+                        }
+                        return Single.zip(obs, new Function<Object[], List<Cron>>() {
                             @Override
-                            public List<Cron> call(Object... args) {
+                            public List<Cron> apply(Object[] objects) throws Exception {
                                 List<Cron> crons = new ArrayList<>();
-                                for (int i = 0; i < args.length; i++) {
-                                    crons.add((Cron)args[i]);
+                                for (int i = 0; i < objects.length; i++) {
+                                    crons.add((Cron) objects[i]);
                                 }
                                 return crons;
                             }
-                        });
-                    }
-                })
-                .subscribe(new Action1<List<Cron>>() {
-                    @Override
-                    public void call(List<Cron> crons) {
-                        for (Cron cron : crons) {
-                            finishNotPersist(mContext, cron);
-                        }
-                        if (callbacks != null) callbacks.onCronsFinished(crons);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable t) {
-                        Log.e(TAG, t.getMessage(), t);
-                        if (callbacks != null) callbacks.onCronsError(t.getMessage());
+                        }).toCompletable();
                     }
                 });
-	}	
-	
-	public static void startNotPersist(Context context, Cron cron) {
-		if (cron != null && cron.getTriggerAtTime() > 0) {
-            AlarmManager manager = createAlarmManager(context);
-			PendingIntent mCronSender = initPendingIntent(context, cron);
-			
-			if (manager != null && mCronSender != null) {
-			    // Schedule the cron!
-				manager.cancel(mCronSender);  
-				if (cron.getInterval() > 0) {
-					manager.setRepeating(cron.getType(), cron.getTriggerAtTime(), cron.getInterval(), mCronSender);
-				} else {
-					manager.set(cron.getType(), cron.getTriggerAtTime(), mCronSender);
-				}
-			}
-            Log.d(TAG, "==[Cron started]["+cron.getId()+"]===================");
-		}
-	}
-	
-	public static void finishNotPersist(Context context, Cron cron) {
-		if (cron != null) {
-			AlarmManager manager = createAlarmManager(context);
-			PendingIntent mCronSender = initPendingIntent(context, cron);
-		    
-			if (mCronSender != null) {
-				// Cancel the cron!
-				manager.cancel(mCronSender);
-			}
-            Log.d(TAG, "==[Cron finished]["+cron.getId()+"]===================");
-		}
-	}
-	
-	protected static PendingIntent initPendingIntent(Context context, Cron cron) {
-		Intent intent = new Intent();
-        intent.setAction(getPackageName(context)+".CRON");
-		intent.putExtra(Cron.class.getSimpleName(), cron.getId());
-		return PendingIntent.getService(context, longToInt(cron.getId()), intent, 0);
-	}
-
-    protected static AlarmManager createAlarmManager(Context context) {
-        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
-    private static int longToInt(long value) {
-        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException (value + " cannot be cast to int without changing its value.");
-        }
-        return (int) value;
-    }
-
-    private static String getPackageName(Context context) {
-        String packageName = "";
-        try {
-            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            packageName = pInfo.packageName;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, e.getMessage(), e);
-        }
-        return packageName;
+    public Completable finishAll() {
+        return cronService.getAll()
+                .flatMapCompletable(new Function<List<Cron>, CompletableSource>() {
+                    @Override
+                    public CompletableSource apply(List<Cron> crons) throws Exception {
+                        List<Single<Cron>> obs = new ArrayList<>();
+                        for (Cron cron : crons) {
+                            obs.add(finish(cron.getId()).toSingleDefault(cron).subscribeOn(Schedulers.io()));
+                        }
+                        return Single.zip(obs, new Function<Object[], List<Cron>>() {
+                            @Override
+                            public List<Cron> apply(Object[] objects) throws Exception {
+                                List<Cron> crons = new ArrayList<>();
+                                for (int i = 0; i < objects.length; i++) {
+                                    crons.add((Cron) objects[i]);
+                                }
+                                return crons;
+                            }
+                        }).toCompletable();
+                    }
+                });
     }
 
 }

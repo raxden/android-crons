@@ -26,10 +26,14 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-v13:25.3.1'
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.github.raxden:AndroidCommons:3.0.9@aar'
 
-    compile project(':crons')
+    implementation project(':crons')
+
+    implementation deps.sample.implementation
+    api deps.sample.api
+    annotationProcessor deps.sample.annotationProcessor
+    compileOnly deps.sample.compileOnly
+    testImplementation deps.sample.testImplementation
+    androidTestImplementation deps.sample.androidTestImplementation
+
 }

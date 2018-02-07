@@ -1,30 +1,36 @@
 package com.raxdenstudios.cron.data.realm;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.raxdenstudios.cron.data.GenericService;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.reactivex.Completable;
+import io.reactivex.CompletableEmitter;
+import io.reactivex.CompletableOnSubscribe;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeEmitter;
+import io.reactivex.MaybeOnSubscribe;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.annotations.NonNull;
 import io.realm.Realm;
 import io.realm.RealmModel;
 import io.realm.RealmObject;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import rx.Observable;
-import rx.Subscriber;
 
 /**
  * Created by agomez on 06/06/2016.
  */
 public class GenericRealmServiceImpl<T extends RealmModel, ID> implements GenericService<T, ID> {
 
-    private static final String TAG = GenericRealmServiceImpl.class.getSimpleName();
-
-    protected Context mContext;
-    protected Class<T> mPersistentClass;
+    private Context mContext;
+    private Class<T> mPersistentClass;
 
     public GenericRealmServiceImpl(Context context, Class<T> persistentClass) {
         mContext = context;
@@ -32,119 +38,130 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
     }
 
     @Override
-    public Observable<List<T>> getAll() {
-        return Observable.create(new Observable.OnSubscribe<List<T>>() {
+    public Maybe<List<T>> getAll() {
+        return Maybe.create(new MaybeOnSubscribe<List<T>>() {
+            List<T> data = new ArrayList<>();
             @Override
-            public void call(final Subscriber<? super List<T>> observer) {
+            public void subscribe(final MaybeEmitter<List<T>> emitter) throws Exception {
                 Realm realm = Realm.getDefaultInstance();
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        try {
-                            RealmResults<T> managedResults = realm.where(mPersistentClass).findAll();
-                            Log.d(TAG, "==[" + managedResults.size() + " " + mPersistentClass.getSimpleName() + "'s founded]==");
-                            observer.onNext(realm.copyFromRealm(managedResults));
-                            observer.onCompleted();
-                        } catch (IllegalArgumentException e) {
-                            Log.e(TAG, e.getMessage(), e);
-                            observer.onError(e);
-                        }
+                        data = findAll(realm);
                     }
                 });
-                if (!realm.isClosed()) realm.close();
+                closeRealmQuietly(realm);
+                if (data.isEmpty()) {
+                    emitter.onComplete();
+                } else {
+                    emitter.onSuccess(data);
+                }
             }
         });
     }
 
     @Override
-    public Observable<T> getById(final ID id) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
+    public Single<T> get(final ID id) {
+        return Single.create(new SingleOnSubscribe<T>() {
+            T data = null;
             @Override
-            public void call(final Subscriber<? super T> observer) {
+            public void subscribe(@NonNull final SingleEmitter<T> emitter) throws Exception {
                 Realm realm = Realm.getDefaultInstance();
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        try {
-                            T data = null;
-                            RealmQuery<T> query = createQuery(realm, mPersistentClass, id);
-                            if (query != null) {
-                                T managedData = query.findFirst();
-                                if (managedData != null) {
-                                    data = realm.copyFromRealm(managedData);
-                                    Log.d(TAG, "==[Cron founded]==");
-                                    Log.d(TAG, data.toString());
-                                }
-                            }
-                            observer.onNext(data);
-                            observer.onCompleted();
-                        } catch (IllegalArgumentException e) {
-                            Log.e(TAG, e.getMessage(), e);
-                            observer.onError(e);
-                        }
+                        data = findFirst(realm, id);
                     }
                 });
-                if (!realm.isClosed()) realm.close();
+                closeRealmQuietly(realm);
+                if (data != null) {
+                    emitter.onSuccess(data);
+                } else {
+                    emitter.onError(new Exception("Cron with " + id + " not found"));
+                }
             }
         });
     }
 
     @Override
-    public Observable<T> save(final T object) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
+    public Single<T> save(final T object) {
+        return Single.create(new SingleOnSubscribe<T>() {
+            T data = null;
             @Override
-            public void call(final Subscriber<? super T> observer) {
+            public void subscribe(@NonNull final SingleEmitter<T> emitter) throws Exception {
                 Realm realm = Realm.getDefaultInstance();
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        try {
-                            T manageData = realm.copyToRealmOrUpdate(object);
-                            Log.d(TAG, "==[" + mPersistentClass.getSimpleName() + " saved]==");
-                            Log.d(TAG, object.toString());
-                            observer.onNext(object);
-                            observer.onCompleted();
-                        } catch (IllegalArgumentException e) {
-                            Log.e(TAG, e.getMessage(), e);
-                            observer.onError(e);
-                        }
+                        data = copyToRealmOrUpdate(realm, object);
                     }
                 });
-                if (!realm.isClosed()) realm.close();
+                closeRealmQuietly(realm);
+                if (data != null) {
+                    emitter.onSuccess(data);
+                } else {
+                    emitter.onError(new Exception("The cron could not be saved!"));
+                }
             }
         });
     }
 
     @Override
-    public Observable<T> delete(final ID id) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
+    public Completable delete(final ID id) {
+        return Completable.create(new CompletableOnSubscribe() {
             @Override
-            public void call(final Subscriber<? super T> observer) {
+            public void subscribe(final CompletableEmitter emitter) throws Exception {
                 Realm realm = Realm.getDefaultInstance();
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        try {
-                            T data = null;
-                            RealmQuery<T> query = createQuery(realm, mPersistentClass, id);
-                            if (query != null) {
-                                T managedData = query.findFirst();
-                                if (managedData != null) {
-                                    Log.d(TAG, "==[" + mPersistentClass.getSimpleName() + " deleted]==");
-                                    ((RealmObject) managedData).deleteFromRealm();
-                                }
-                            }
-                            observer.onNext(data);
-                            observer.onCompleted();
-                        } catch (IllegalArgumentException e) {
-                            Log.e(TAG, e.getMessage(), e);
-                            observer.onError(e);
-                        }
+                        deleteFromRealm(realm, id);
                     }
                 });
-                if (!realm.isClosed()) realm.close();
+                emitter.onComplete();
+                closeRealmQuietly(realm);
             }
         });
+    }
+
+    protected T findFirst(Realm realm, ID id) {
+        T data = null;
+        RealmQuery<T> query = createQuery(realm, mPersistentClass, id);
+        if (query != null) {
+            T managedData = query.findFirst();
+            if (managedData != null) {
+                data = realm.copyFromRealm(managedData);
+            }
+        }
+        return data;
+    }
+
+    protected List<T> findAll(Realm realm) {
+        List<T> data = new ArrayList<>();
+        RealmResults<T> managedResults = realm.where(mPersistentClass).findAll();
+        if (!managedResults.isEmpty()) {
+            data = realm.copyFromRealm(managedResults);
+        }
+        return data;
+    }
+
+    protected T copyToRealmOrUpdate(Realm realm, T data) {
+        T managedData = realm.copyToRealmOrUpdate(data);
+        return realm.copyFromRealm(managedData);
+    }
+
+    protected void deleteFromRealm(Realm realm, ID id) {
+        RealmQuery<T> query = createQuery(realm, mPersistentClass, id);
+        if (query != null) {
+            T managedData = query.findFirst();
+            if (managedData != null) {
+                ((RealmObject) managedData).deleteFromRealm();
+            }
+        }
+    }
+
+    protected void closeRealmQuietly(Realm realm) {
+        if (!realm.isClosed()) realm.close();
     }
 
     private RealmQuery<T> createQuery(Realm realm, Class<T> persistenceClass, ID id) {

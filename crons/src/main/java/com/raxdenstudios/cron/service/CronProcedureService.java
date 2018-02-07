@@ -9,74 +9,97 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.raxdenstudios.cron.CronHandler;
 import com.raxdenstudios.cron.data.CronService;
 import com.raxdenstudios.cron.data.factory.CronFactoryService;
 import com.raxdenstudios.cron.model.Cron;
+import com.raxdenstudios.cron.utils.CronUtils;
 
 import java.util.Calendar;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.MaybeSource;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+import io.reactivex.observers.DisposableMaybeObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public abstract class CronProcedureService extends Service {
 
     private static final String TAG = CronProcedureService.class.getSimpleName();
 
 	private CronService mCronService;
+	private CronHandler mCronHandler;
 
     @Override
     public void onCreate() {
     	super.onCreate();
         mCronService = new CronFactoryService(this);
+        mCronHandler = new CronHandler(this, mCronService);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
     	super.onStartCommand(intent, flags, startId);
 
-        Log.d(TAG, "CronProcedureService started....");
-        long cronId = getCronIdFromIntent(intent);
-        if (cronId > 0) {
-            mCronService.getById(cronId)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .map(new Func1<Cron, Cron>() {
-                        @Override
-                        public Cron call(Cron cron) {
+        Single.just(intent)
+                .map(new Function<Intent, Long>() {
+                    @Override
+                    public Long apply(Intent intent) throws Exception {
+                        return getCronIdFromIntent(intent);
+                    }
+                })
+                .filter(new Predicate<Long>() {
+                    @Override
+                    public boolean test(Long cronId) throws Exception {
+                        return cronId != 0;
+                    }
+                })
+                .flatMap(new Function<Long, MaybeSource<Cron>>() {
+                    @Override
+                    public MaybeSource<Cron> apply(Long cronId) throws Exception {
+                        return mCronService.get(cronId).toMaybe();
+                    }
+                })
+                .filter(new Predicate<Cron>() {
+                    @Override
+                    public boolean test(Cron cron) throws Exception {
+                        return cron.isStatus();
+                    }
+                })
+                .flatMap(new Function<Cron, MaybeSource<Cron>>() {
+                    @Override
+                    public MaybeSource<Cron> apply(Cron cron) throws Exception {
+                        if (cron.getInterval() > 0) {
                             cron.setTriggerAtTime((Calendar.getInstance().getTimeInMillis() + cron.getInterval()));
-                            return cron;
+                            return mCronHandler.start(cron).toSingleDefault(cron).toMaybe();
+                        } else {
+                            return Single.just(cron).toMaybe();
                         }
-                    })
-                    .concatMap(new Func1<Cron, Observable<Cron>>() {
-                        @Override
-                        public Observable<Cron> call(Cron cron) {
-                            return mCronService.save(cron).subscribeOn(Schedulers.newThread());
-                        }
-                    })
-                    .filter(new Func1<Cron, Boolean>() {
-                        @Override
-                        public Boolean call(Cron cron) {
-                            return cron.isStatus();
-                        }
-                    })
-                    .subscribe(new Action1<Cron>() {
-                        @Override
-                        public void call(Cron cron) {
-                            Log.d(TAG, "Cron launched!");
-                            onCronLaunched(cron);
-                            Log.d(TAG, "CronProcedureService finished....");
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable t) {
-                            Log.e(TAG, t.getMessage(), t);
-                            Log.d(TAG, "CronProcedureService finished....");
-                        }
-                    });
-        }
+                    }
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableMaybeObserver<Cron>() {
+                    @Override
+                    public void onSuccess(Cron cron) {
+                        Log.d(TAG, "Cron[" + cron.getId() + "] launched at " + CronUtils.currentDateTime());
+                        onCronLaunched(cron);
+                        dispose();
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        Log.e(TAG, t.getMessage(), t);
+                        dispose();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        dispose();
+                    }
+                });
 
         return START_STICKY;
     }

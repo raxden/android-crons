@@ -8,7 +8,9 @@ import com.raxdenstudios.cron.model.Cron;
 
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Completable;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 
 /**
  * Created by agomez on 09/06/2016.
@@ -22,22 +24,23 @@ public class CronFactoryService implements CronService {
     }
 
     @Override
-    public Observable<List<Cron>> getAll() {
+    public Maybe<List<Cron>> getAll() {
         return mCronService.getAll();
     }
 
     @Override
-    public Observable<Cron> getById(Long aLong) {
-        return mCronService.getById(aLong);
+    public Single<Cron> get(Long cronID) {
+        return mCronService.get(cronID);
     }
 
     @Override
-    public Observable<Cron> save(Cron object) {
-        return mCronService.save(object);
+    public Single<Cron> save(Cron cron) {
+        return mCronService.save(cron);
     }
 
     @Override
-    public Observable<Cron> delete(Long aLong) {
-        return mCronService.delete(aLong);
+    public Completable delete(Long cronID) {
+        return mCronService.delete(cronID);
     }
+
 }

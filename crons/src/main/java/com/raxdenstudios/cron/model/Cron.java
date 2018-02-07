@@ -4,7 +4,6 @@ import android.app.AlarmManager;
 
 import org.parceler.Parcel;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,6 +24,7 @@ public class Cron extends RealmObject {
     private boolean status;
 
     public Cron() {
+
     }
 
     private Cron(Builder builder) {

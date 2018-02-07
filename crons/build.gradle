@@ -1,8 +1,7 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'realm-android'
 
-group = "com.raxdenstudios"
+group = "com.raxdenstudios.crons"
 version = VERSION_NAME
 
 android {
@@ -13,17 +12,19 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        testInstrumentationRunner rootProject.ext.testInstrumentationRunner
-
         consumerProguardFiles 'proguard-rules.pro'
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
+    implementation fileTree(include: '*.jar', dir: 'libs')
 
-    compile libraryDependencies.compile
-    testCompile libraryDependencies.testCompile
+    implementation deps.crons.implementation
+    api deps.crons.api
+    annotationProcessor deps.crons.annotationProcessor
+    compileOnly deps.crons.compileOnly
+    testImplementation deps.crons.testImplementation
+    androidTestImplementation deps.crons.androidTestImplementation
 }
 
 apply from: '../buildSystem/commons.gradle'
