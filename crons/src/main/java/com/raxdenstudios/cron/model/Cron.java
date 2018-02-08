@@ -22,6 +22,7 @@ public class Cron extends RealmObject {
     private long triggerAtTime;
     private long interval;
     private boolean status;
+    private String data;
 
     public Cron() {
 
@@ -33,6 +34,7 @@ public class Cron extends RealmObject {
         this.interval = builder.interval;
         this.type = builder.type;
         this.status = builder.status;
+        this.data = builder.data;
     }
 
 
@@ -76,6 +78,14 @@ public class Cron extends RealmObject {
         this.status = status;
     }
 
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
     @Override
     public String toString() {
         String currentTime = new SimpleDateFormat("dd/MM/yy HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -97,6 +107,7 @@ public class Cron extends RealmObject {
         private long triggerAtTime;
         private long interval;
         private boolean status;
+        private String data;
 
         public Builder() {
             this(0);
@@ -144,6 +155,11 @@ public class Cron extends RealmObject {
 
         public Builder status(boolean status) {
             this.status = status;
+            return this;
+        }
+
+        public Builder data(String data) {
+            this.data = data;
             return this;
         }
 
