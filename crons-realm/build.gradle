@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'realm-android'
 
-group = "com.raxdenstudios.cron"
+group = "com.raxdenstudios.cron.realm"
 version = VERSION_NAME
 
 android {
@@ -18,13 +18,14 @@ android {
 
 dependencies {
     implementation fileTree(include: '*.jar', dir: 'libs')
+    implementation project(':crons')
 
-    implementation deps.crons.implementation
-    api deps.crons.api
-    annotationProcessor deps.crons.annotationProcessor
-    compileOnly deps.crons.compileOnly
-    testImplementation deps.crons.testImplementation
-    androidTestImplementation deps.crons.androidTestImplementation
+    implementation deps.crons_realm.implementation
+    api deps.crons_realm.api
+    annotationProcessor deps.crons_realm.annotationProcessor
+    compileOnly deps.crons_realm.compileOnly
+    testImplementation deps.crons_realm.testImplementation
+    androidTestImplementation deps.crons_realm.androidTestImplementation
 }
 
 apply from: '../buildSystem/commons.gradle'

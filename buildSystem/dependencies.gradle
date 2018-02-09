@@ -5,11 +5,13 @@ ext {
     servicesVersion = '11.4.2'
 
     androidCommonsVersion = '3.0.13'        // https://github.com/raxden/commons
+    androidPreferencesVersion = '3.0.3'     // https://github.com/raxden/android-preferences
 
     // Libraries
     reactiveAndroidVersion = '2.0.1'        // https://github.com/ReactiveX/RxAndroid
     reactiveJavaVersion = '2.1.0'           // https://github.com/ReactiveX/RxAndroid
     parcelerVersion = '1.1.8'               // https://github.com/johncarl81/parceler
+    gsonVersion = '2.6.2'                   // https://github.com/google/gson
 
     // Testing
     junitVersion = '4.12'
@@ -22,12 +24,36 @@ ext {
 
                     ],
                     api: [
+                            "com.github.raxden:android-commons:${androidCommonsVersion}@aar",
+                            "com.github.raxden:android-preferences:${androidPreferencesVersion}@aar",
                             "io.reactivex.rxjava2:rxandroid:${reactiveAndroidVersion}",
                             "io.reactivex.rxjava2:rxjava:${reactiveJavaVersion}",
+                            "com.google.code.gson:gson:${gsonVersion}",
                             "org.parceler:parceler-api:${parcelerVersion}"
                     ],
                     annotationProcessor : [
                             "org.parceler:parceler:${parcelerVersion}"
+                    ],
+                    compileOnly : [
+
+                    ],
+                    testImplementation : [
+                            "junit:junit:${junitVersion}"
+                    ],
+                    androidTestImplementation : [
+                            "com.android.support.test:runner:${runnerVersion}",
+                            "com.android.support.test.espresso:espresso-core:${espressoVersion}"
+                    ]
+            ],
+            crons_realm: [
+                    implementation: [
+
+                    ],
+                    api: [
+
+                    ],
+                    annotationProcessor : [
+
                     ],
                     compileOnly : [
 

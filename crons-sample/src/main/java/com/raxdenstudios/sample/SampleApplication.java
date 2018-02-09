@@ -3,8 +3,8 @@ package com.raxdenstudios.sample;
 import android.app.Application;
 
 import com.raxdenstudios.commons.util.Utils;
-import com.raxdenstudios.cron.CronRealmModule;
-import com.raxdenstudios.cron.data.realm.CronRealmMigration;
+import com.raxdenstudios.cron.realm.CronRealmMigration;
+import com.raxdenstudios.cron.realm.CronRealmModule;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;

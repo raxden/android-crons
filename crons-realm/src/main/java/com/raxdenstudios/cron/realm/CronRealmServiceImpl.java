@@ -1,4 +1,4 @@
-package com.raxdenstudios.cron.data.realm;
+package com.raxdenstudios.cron.realm;
 
 import android.content.Context;
 

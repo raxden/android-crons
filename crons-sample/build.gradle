@@ -6,7 +6,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.raxdenstudios.crons.sample"
+        applicationId "com.raxdenstudios.sample"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -28,6 +28,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation project(':crons')
+    implementation project(':crons-realm')
 
     implementation deps.sample.implementation
     api deps.sample.api

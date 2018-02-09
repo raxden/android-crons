@@ -1,4 +1,4 @@
-package com.raxdenstudios.cron.data.realm;
+package com.raxdenstudios.cron.realm;
 
 import android.content.Context;
 
@@ -29,12 +29,12 @@ import io.realm.RealmResults;
  */
 public class GenericRealmServiceImpl<T extends RealmModel, ID> implements GenericService<T, ID> {
 
-    private Context mContext;
-    private Class<T> mPersistentClass;
+    private final Context context;
+    private final Class<T> persistentClass;
 
     public GenericRealmServiceImpl(Context context, Class<T> persistentClass) {
-        mContext = context;
-        mPersistentClass = persistentClass;
+        this.context = context;
+        this.persistentClass = persistentClass;
     }
 
     @Override
@@ -126,7 +126,7 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
 
     protected T findFirst(Realm realm, ID id) {
         T data = null;
-        RealmQuery<T> query = createQuery(realm, mPersistentClass, id);
+        RealmQuery<T> query = createQuery(realm, persistentClass, id);
         if (query != null) {
             T managedData = query.findFirst();
             if (managedData != null) {
@@ -138,7 +138,7 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
 
     protected List<T> findAll(Realm realm) {
         List<T> data = new ArrayList<>();
-        RealmResults<T> managedResults = realm.where(mPersistentClass).findAll();
+        RealmResults<T> managedResults = realm.where(persistentClass).findAll();
         if (!managedResults.isEmpty()) {
             data = realm.copyFromRealm(managedResults);
         }
@@ -151,7 +151,7 @@ public class GenericRealmServiceImpl<T extends RealmModel, ID> implements Generi
     }
 
     protected void deleteFromRealm(Realm realm, ID id) {
-        RealmQuery<T> query = createQuery(realm, mPersistentClass, id);
+        RealmQuery<T> query = createQuery(realm, persistentClass, id);
         if (query != null) {
             T managedData = query.findFirst();
             if (managedData != null) {

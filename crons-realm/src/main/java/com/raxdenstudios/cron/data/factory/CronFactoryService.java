@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.raxdenstudios.cron.data.CronService;
 import com.raxdenstudios.cron.model.Cron;
+import com.raxdenstudios.cron.realm.CronRealmServiceImpl;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class CronFactoryService implements CronService {
     private CronService mCronService;
 
     public CronFactoryService(Context context) {
-        mCronService = new CronPreferencesServiceImpl(context);
+        mCronService = new CronRealmServiceImpl(context);
     }
 
     @Override

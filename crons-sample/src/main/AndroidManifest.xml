@@ -17,7 +17,7 @@
         <!-- Notification Service -->
         <service android:name=".SampleCronProcedureService">
             <intent-filter>
-                <action android:name="com.raxdenstudios.crons.sample.CRON" />
+                <action android:name="com.raxdenstudios.sample.CRON" />
             </intent-filter>
         </service>
 
