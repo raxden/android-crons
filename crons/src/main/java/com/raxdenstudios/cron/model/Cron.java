@@ -2,11 +2,11 @@ package com.raxdenstudios.cron.model;
 
 import android.app.AlarmManager;
 
-import io.realm.annotations.PrimaryKey;
+import org.parceler.Parcel;
 
+@Parcel
 public class Cron {
 
-    @PrimaryKey
     private long id;
     private int type;
     private long triggerAtTime;
