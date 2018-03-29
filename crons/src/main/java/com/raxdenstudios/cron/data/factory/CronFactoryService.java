@@ -1,6 +1,7 @@
 package com.raxdenstudios.cron.data.factory;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.raxdenstudios.cron.data.CronService;
 import com.raxdenstudios.cron.model.Cron;
@@ -20,6 +21,14 @@ public class CronFactoryService implements CronService {
 
     public CronFactoryService(Context context) {
         mCronService = new CronPreferencesServiceImpl(context);
+    }
+
+    public CronFactoryService(Context context, String name, int mode) {
+        mCronService = new CronPreferencesServiceImpl(context, name, mode);
+    }
+
+    public CronFactoryService(SharedPreferences settings) {
+        mCronService = new CronPreferencesServiceImpl(settings);
     }
 
     @Override
