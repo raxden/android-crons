@@ -1,6 +1,7 @@
 package com.raxdenstudios.cron.data.factory;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.raxdenstudios.cron.data.CronService;
 import com.raxdenstudios.cron.model.Cron;
@@ -27,14 +28,22 @@ import io.reactivex.SingleOnSubscribe;
 
 public class CronPreferencesServiceImpl implements CronService {
 
-    private final Context context;
     private final Class<Cron> persistentClass;
     private final AdvancedPreferences advancedPreferences;
 
     public CronPreferencesServiceImpl(Context context) {
-        this.context = context;
         this.persistentClass = Cron.class;
         this.advancedPreferences = new AdvancedPreferences(context);
+    }
+
+    public CronPreferencesServiceImpl(Context context, String name, int mode) {
+        this.persistentClass = Cron.class;
+        this.advancedPreferences = new AdvancedPreferences(context, name, mode);
+    }
+
+    public CronPreferencesServiceImpl(SharedPreferences settings) {
+        this.persistentClass = Cron.class;
+        this.advancedPreferences = new AdvancedPreferences(settings);
     }
 
     @Override
