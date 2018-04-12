@@ -24,7 +24,7 @@ import io.reactivex.*
 import java.util.*
 import kotlin.reflect.KClass
 
-class CronPreferencesServiceKImpl : CronService {
+class CronPreferencesServiceImpl : CronService {
 
     private val persistentClass: KClass<Cron>
     private val advancedPreferences: AdvancedPreferences
