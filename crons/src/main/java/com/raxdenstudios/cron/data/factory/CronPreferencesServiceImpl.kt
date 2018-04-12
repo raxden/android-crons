@@ -95,7 +95,7 @@ class CronPreferencesServiceImpl : CronService {
     private fun getCronListFromPreferences(): List<Cron> {
         val cronList = ArrayList<Cron>()
         for (key in advancedPreferences.all.keys) {
-            if (key.contains(persistentClass.simpleName.plus("_"))) {
+            if (key.contains(persistentClass.java.simpleName.plus("_"))) {
                 cronList.add(advancedPreferences.get(key, persistentClass.java, Cron.Builder(0).create()))
             }
         }
@@ -127,7 +127,7 @@ class CronPreferencesServiceImpl : CronService {
     }
 
     private fun getKey(id: Long): String {
-        return persistentClass.simpleName.plus("_$id")
+        return persistentClass.java.simpleName.plus("_$id")
     }
 
     private fun increasePrimaryKey(cron: Cron) {
