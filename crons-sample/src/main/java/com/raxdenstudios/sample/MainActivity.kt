@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         val cron3 = Cron.Builder(2).triggerAtTime(now + 60000).create()
 
         compositeDisposable.add(CronHandler(this).start(cron)
+                .andThen(CronHandler(this).start(cron2))
+                .andThen(CronHandler(this).start(cron3))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableCompletableObserver() {
