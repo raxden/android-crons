@@ -41,20 +41,20 @@ class CronFactoryService : CronService {
         mCronService = CronPreferencesServiceImpl(settings)
     }
 
-    override fun getAll(): Maybe<List<Cron>> {
-        return mCronService!!.all
+    override fun get(id: Long): Single<Cron> {
+        return mCronService!!.get(id)
     }
 
-    override fun get(cronID: Long?): Single<Cron> {
-        return mCronService!!.get(cronID)
+    override fun getAll(): Maybe<List<Cron>> {
+        return mCronService!!.getAll()
     }
 
     override fun save(cron: Cron): Single<Cron> {
         return mCronService!!.save(cron)
     }
 
-    override fun delete(cronID: Long?): Completable {
-        return mCronService!!.delete(cronID)
+    override fun delete(id: Long): Completable {
+        return mCronService!!.delete(id)
     }
 
 }
