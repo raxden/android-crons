@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
-apply plugin: 'realm-android'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
 
 group = "com.raxdenstudios.cron"
 version = VERSION_NAME
@@ -14,18 +16,21 @@ android {
 
         consumerProguardFiles 'proguard-rules.pro'
     }
+
+    androidExtensions {
+        experimental = true
+    }
 }
 
 dependencies {
     implementation fileTree(include: '*.jar', dir: 'libs')
 
-    implementation deps.crons.implementation
-    api deps.crons.api
-    annotationProcessor deps.crons.annotationProcessor
-    compileOnly deps.crons.compileOnly
-    testImplementation deps.crons.testImplementation
-    androidTestImplementation deps.crons.androidTestImplementation
+    implementation deps.library.implementation
+    api deps.library.api
+    kapt deps.library.kapt
+    compileOnly deps.library.compileOnly
+    testImplementation deps.library.testImplementation
+    androidTestImplementation deps.library.androidTestImplementation
 }
 
 apply from: '../buildSystem/commons.gradle'
-apply from: 'build_javadoc.gradle'

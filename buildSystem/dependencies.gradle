@@ -1,16 +1,19 @@
 ext {
 
     // Android dependencies
-    supportLibraryVersion = '26.1.0'
-    servicesVersion = '11.4.2'
+    kotlinVersion = '1.2.30'
+    supportLibraryVersion = '27.1.0'
+    constraintsLayoutVersion = '1.0.2'
+    servicesVersion = '11.8.0'
 
-    androidCommonsVersion = '3.0.13'        // https://github.com/raxden/commons
+    androidCommonsVersion = '3.0.15'        // https://github.com/raxden/android-commons
     androidPreferencesVersion = '3.0.4'     // https://github.com/raxden/android-preferences
 
     // Libraries
-    reactiveAndroidVersion = '2.0.1'        // https://github.com/ReactiveX/RxAndroid
-    reactiveJavaVersion = '2.1.0'           // https://github.com/ReactiveX/RxAndroid
-    parcelerVersion = '1.1.8'               // https://github.com/johncarl81/parceler
+    reactiveAndroidVersion = '2.0.2'        // https://github.com/ReactiveX/RxAndroid
+    reactiveJavaVersion = '2.1.12'          // https://github.com/ReactiveX/RxAndroid
+    reactiveKotlinVersion = '2.2.0'         // https://github.com/ReactiveX/RxKotlin
+    parcelerVersion = '1.1.9'               // https://github.com/johncarl81/parceler
     gsonVersion = '2.6.2'                   // https://github.com/google/gson
 
     // Testing
@@ -19,24 +22,21 @@ ext {
     espressoVersion = '3.0.1'
 
     deps = [
-            crons: [
-                    implementation: [
-
-                    ],
+            library: [
+                    implementation: [],
                     api: [
                             "com.github.raxden:android-commons:${androidCommonsVersion}@aar",
                             "com.github.raxden:android-preferences:${androidPreferencesVersion}@aar",
                             "io.reactivex.rxjava2:rxandroid:${reactiveAndroidVersion}",
                             "io.reactivex.rxjava2:rxjava:${reactiveJavaVersion}",
+                            "io.reactivex.rxjava2:rxkotlin:${reactiveKotlinVersion}",
                             "com.google.code.gson:gson:${gsonVersion}",
                             "org.parceler:parceler-api:${parcelerVersion}"
                     ],
-                    annotationProcessor : [
+                    kapt : [
                             "org.parceler:parceler:${parcelerVersion}"
                     ],
-                    compileOnly : [
-
-                    ],
+                    compileOnly : [],
                     testImplementation : [
                             "junit:junit:${junitVersion}"
                     ],
@@ -45,19 +45,12 @@ ext {
                             "com.android.support.test.espresso:espresso-core:${espressoVersion}"
                     ]
             ],
-            crons_realm: [
-                    implementation: [
-
-                    ],
-                    api: [
-
-                    ],
-                    annotationProcessor : [
-
-                    ],
-                    compileOnly : [
-
-                    ],
+            library_realm: [
+                    implementation: [],
+                    api: [],
+                    annotationProcessor : [],
+                    kapt : [],
+                    compileOnly : [],
                     testImplementation : [
                             "junit:junit:${junitVersion}"
                     ],
@@ -73,15 +66,9 @@ ext {
                             "com.android.support:design:${supportLibraryVersion}",
                             "com.google.android.gms:play-services-maps:${servicesVersion}"
                     ],
-                    api: [
-
-                    ],
-                    annotationProcessor : [
-
-                    ],
-                    compileOnly : [
-
-                    ],
+                    annotationProcessor : [],
+                    kapt : [],
+                    compileOnly : [],
                     testImplementation : [
                             "junit:junit:${junitVersion}"
                     ],

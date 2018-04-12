@@ -71,6 +71,7 @@ public abstract class CronProcedureService extends Service {
                 .flatMap(new Function<Cron, MaybeSource<Cron>>() {
                     @Override
                     public MaybeSource<Cron> apply(Cron cron) throws Exception {
+                        Log.d(TAG, "Cron[" + cron.getId() + "] launched at " + CronUtils.currentDateTime());
                         if (cron.getInterval() > 0) {
                             cron.setTriggerAtTime((Calendar.getInstance().getTimeInMillis() + cron.getInterval()));
                             return mCronHandler.start(cron).toSingleDefault(cron).toMaybe();
@@ -84,7 +85,6 @@ public abstract class CronProcedureService extends Service {
                 .subscribeWith(new DisposableMaybeObserver<Cron>() {
                     @Override
                     public void onSuccess(Cron cron) {
-                        Log.d(TAG, "Cron[" + cron.getId() + "] launched at " + CronUtils.currentDateTime());
                         onCronLaunched(cron);
                         dispose();
                     }

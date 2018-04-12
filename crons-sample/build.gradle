@@ -1,40 +1,43 @@
 apply plugin: 'com.android.application'
-apply plugin: 'realm-android'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.raxdenstudios.sample"
+        applicationId "com.raxdenstudios.crons.sample"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
 
-repositories {
-    maven { url "https://jitpack.io" }
+    androidExtensions {
+        experimental = true
+    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':crons')
-    implementation project(':crons-realm')
+//    implementation project(':crons-realm')
 
     implementation deps.sample.implementation
-    api deps.sample.api
     annotationProcessor deps.sample.annotationProcessor
+    kapt deps.sample.kapt
     compileOnly deps.sample.compileOnly
     testImplementation deps.sample.testImplementation
     androidTestImplementation deps.sample.androidTestImplementation
-
 }
