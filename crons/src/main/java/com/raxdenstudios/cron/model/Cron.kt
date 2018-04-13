@@ -4,11 +4,11 @@ import android.app.AlarmManager
 
 data class Cron(val builder: Builder) {
 
-    val id: Long
-    val type: Int
-    val triggerAtTime: Long
-    val interval: Long
-    val status: Boolean
+    var id: Long
+    var type: Int
+    var triggerAtTime: Long
+    var interval: Long
+    var status: Boolean
 
     init {
         id = builder.id
