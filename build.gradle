@@ -2,7 +2,7 @@ apply from: 'buildSystem/dependencies.gradle'
 
 buildscript {
     ext.kotlinVersion = '1.2.30'
-    ext.gradleVersion = '3.1.0'
+    ext.gradleVersion = '3.1.1'
     ext.gradlePluginVersion = '1.5'
     ext.realmPluginVersion = '4.3.3'
 
