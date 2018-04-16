@@ -6,15 +6,12 @@ ext {
     constraintsLayoutVersion = '1.0.2'
     servicesVersion = '11.8.0'
 
-    androidCommonsVersion = '3.0.15'        // https://github.com/raxden/android-commons
     androidPreferencesVersion = '3.0.4'     // https://github.com/raxden/android-preferences
 
     // Libraries
     reactiveAndroidVersion = '2.0.2'        // https://github.com/ReactiveX/RxAndroid
     reactiveJavaVersion = '2.1.12'          // https://github.com/ReactiveX/RxAndroid
     reactiveKotlinVersion = '2.2.0'         // https://github.com/ReactiveX/RxKotlin
-    parcelerVersion = '1.1.9'               // https://github.com/johncarl81/parceler
-    gsonVersion = '2.6.2'                   // https://github.com/google/gson
 
     // Testing
     junitVersion = '4.12'
@@ -29,12 +26,8 @@ ext {
                             "io.reactivex.rxjava2:rxandroid:${reactiveAndroidVersion}",
                             "io.reactivex.rxjava2:rxjava:${reactiveJavaVersion}",
                             "io.reactivex.rxjava2:rxkotlin:${reactiveKotlinVersion}",
-                            "com.google.code.gson:gson:${gsonVersion}",
-                            "org.parceler:parceler-api:${parcelerVersion}"
                     ],
-                    kapt : [
-                            "org.parceler:parceler:${parcelerVersion}"
-                    ],
+                    kapt : [],
                     compileOnly : [],
                     testImplementation : [
                             "junit:junit:${junitVersion}"
