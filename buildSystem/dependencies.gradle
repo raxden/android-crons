@@ -25,7 +25,6 @@ ext {
             library: [
                     implementation: [],
                     api: [
-                            "com.github.raxden:android-commons:${androidCommonsVersion}@aar",
                             "com.github.raxden:android-preferences:${androidPreferencesVersion}@aar",
                             "io.reactivex.rxjava2:rxandroid:${reactiveAndroidVersion}",
                             "io.reactivex.rxjava2:rxjava:${reactiveJavaVersion}",
@@ -61,7 +60,6 @@ ext {
             ],
             sample: [
                     implementation: [
-                            "com.github.raxden:android-commons:${androidCommonsVersion}@aar",
                             "com.android.support:appcompat-v7:${supportLibraryVersion}",
                             "com.android.support:design:${supportLibraryVersion}",
                             "com.google.android.gms:play-services-maps:${servicesVersion}"

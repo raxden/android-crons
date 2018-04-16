@@ -27,7 +27,7 @@ import io.reactivex.Single
 
 class CronFactoryService : CronService {
 
-    private var mCronService: CronService? = null
+    private val mCronService: CronService
 
     constructor(context: Context) {
         mCronService = CronPreferencesServiceImpl(context)
@@ -42,19 +42,19 @@ class CronFactoryService : CronService {
     }
 
     override fun get(id: Long): Single<Cron> {
-        return mCronService!!.get(id)
+        return mCronService.get(id)
     }
 
     override fun getAll(): Maybe<List<Cron>> {
-        return mCronService!!.getAll()
+        return mCronService.getAll()
     }
 
     override fun save(cron: Cron): Single<Cron> {
-        return mCronService!!.save(cron)
+        return mCronService.save(cron)
     }
 
     override fun delete(id: Long): Completable {
-        return mCronService!!.delete(id)
+        return mCronService.delete(id)
     }
 
 }
