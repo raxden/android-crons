@@ -45,15 +45,15 @@ task increaseLibraryVersion {
         createPushTagToGitTask(versionName)
     }
     doLast {
-        println(":increaseBuildVersion - Incrementing build version...")
-        println(":increaseBuildVersion - Upload new build version to repository...")
+        println(":increaseLibraryVersion - Incrementing library version...")
+        println(":increaseLibraryVersion - Upload new library version to repository...")
         tasks.updateReadmeFile.execute()
         tasks.addToGit.execute()
         tasks.commitToGitWithMessage.execute()
         tasks.pushToGit.execute()
         tasks.createTagToGit.execute()
         tasks.pushTagToGit.execute()
-        println(":increaseBuildVersion - Build version incremented to " + versionName)
+        println(":increaseBuildVersion - Library version incremented to " + versionName)
     }
 }
 
