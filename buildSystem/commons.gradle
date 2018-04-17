@@ -1,4 +1,4 @@
-// v1.0.5
+// v1.0.4
 
 import java.util.regex.Pattern
 
@@ -88,43 +88,31 @@ def createUpdateReadmeFileTask(version) {
     }
 }
 
-task uploadLibraryWithMessage {
-    doFirst {
-        def message = "$message"
-        createUploadLibraryToGitTask(message)
-        tasks.uploadLibraryToGit.execute()
-    }
+// gradlew uploadLibrary -Pmessage=messageToUpload
+task uploadLibraryWithMessage << {
+    def message = "$message"
+    createUploadLibraryToGitTask(message)
+    tasks.uploadLibraryToGit.execute()
 }
 
-task increaseBuildVersion {
-    doFirst {
-        println(":increaseBuildVersion - Incrementing build version...")
-        println(":increaseBuildVersion - Upload new build version to repository...")
-        def versionName = increaseBuildVersion()
-        createUpdateReadmeFileTask(versionName)
-        tasks.updateReadmeFile.execute()
-        tasks.addToGit.execute()
-        createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
-        tasks.commitToGitWithMessage.execute()
-        tasks.pushToGit.execute()
-        println(":increaseBuildVersion - Build version incremented to " + versionName)
-    }
+task increaseBuildVersion << {
+    println(":increaseBuildVersion - Incrementing build version...")
+    def versionName = increaseBuildVersion()
+    createUpdateReadmeFileTask(versionName)
+    tasks.updateReadmeFile.execute()
+    println(":increaseBuildVersion - build version incremented to " + versionName)
 }
 
-task uploadLibrary {
-    doFirst {
-        createUploadLibraryToGitTask("Upload library (" + version + ")")
-        tasks.uploadLibraryToGit.execute()
-    }
+task uploadLibrary << {
+    createUploadLibraryToGitTask("Upload library (" + version + ")")
+    tasks.uploadLibraryToGit.execute()
 }
 
-task uploadRelease {
-    doFirst {
-        println(":uploadRelease - Upload release to repository...")
-        createUploadReleaseToGitTask(version, "Release " + version + " created")
-        tasks.uploadReleaseToGit.execute()
-        println(":uploadRelease - Release uploaded: " + version)
-    }
+task uploadRelease << {
+    println(":uploadRelease - Upload release to repository...")
+    createUploadReleaseToGitTask(version, "Release " + version + " created")
+    tasks.uploadReleaseToGit.execute()
+    println(":uploadRelease - Release uploaded: " + version)
 }
 
 String increaseBuildVersion() {
