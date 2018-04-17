@@ -42,7 +42,7 @@ task increaseLibraryVersion {
         createUpdateReadmeFileTask(versionName)
         createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
         createTagToGitTask(versionName, "Release candidate")
-        createPushTagToGitTask(versionName)
+        createPushAllTagsToGitTask(versionName)
     }
     doLast {
         println(":increaseLibraryVersion - Incrementing library version...")
@@ -52,7 +52,7 @@ task increaseLibraryVersion {
         tasks.commitToGitWithMessage.execute()
         tasks.pushToGit.execute()
         tasks.createTagToGit.execute()
-        tasks.pushTagToGit.execute()
+        tasks.pushAllTagsToGit.execute()
         println(":increaseBuildVersion - Library version incremented to " + versionName)
     }
 }
@@ -93,8 +93,15 @@ def createTagToGitTask(tag, message) {
 
 def createPushTagToGitTask(tag) {
     return tasks.create(name: 'pushTagToGit', type: Exec) {
-        description 'Push tag git.'
+        description 'Push tag to git.'
         commandLine "git", "push", "origin", tag
+    }
+}
+
+def createPushAllTagsToGitTask() {
+    return tasks.create(name: 'pushAllTagsToGit', type: Exec) {
+        description 'Push tags to git.'
+        commandLine "git", "push", "--tags"
     }
 }
 
