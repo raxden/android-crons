@@ -40,11 +40,11 @@ task increaseBuildVersion {
         println(":increaseBuildVersion - Incrementing build version...")
         println(":increaseBuildVersion - Upload new build version to repository...")
         createUpdateReadmeFileTask(versionName)
-        tasks.updateReadmeFile.execute()
+        createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
     }
     doLast {
+        tasks.updateReadmeFile.execute()
         tasks.addToGit.execute()
-        createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
         tasks.commitToGitWithMessage.execute()
         tasks.pushToGit.execute()
         println(":increaseBuildVersion - Build version incremented to " + versionName)
