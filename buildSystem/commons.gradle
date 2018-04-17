@@ -12,19 +12,16 @@ task pullFromGit(type: Exec) {
 }
 
 task addToGit(type: Exec) {
-    println(":addToGit - ")
     description 'Add git.'
     commandLine "git", "add", "-A"
 }
 
 task commitToGit(type: Exec) {
-    println(":commitToGit - ")
     description 'Commit git.'
     commandLine "git", "commit"
 }
 
 task pushToGit(type: Exec) {
-    println(":pushToGit - ")
     description 'Push git.'
     commandLine "git", "push"
 }
@@ -38,12 +35,14 @@ task uploadLibraryWithMessage {
 }
 
 task increaseBuildVersion {
+    def versionName = increaseBuildVersion()
     doFirst {
         println(":increaseBuildVersion - Incrementing build version...")
         println(":increaseBuildVersion - Upload new build version to repository...")
-        def versionName = increaseBuildVersion()
         createUpdateReadmeFileTask(versionName)
         tasks.updateReadmeFile.execute()
+    }
+    doLast {
         tasks.addToGit.execute()
         createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
         tasks.commitToGitWithMessage.execute()
