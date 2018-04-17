@@ -12,16 +12,19 @@ task pullFromGit(type: Exec) {
 }
 
 task addToGit(type: Exec) {
+    println(":addToGit - ")
     description 'Add git.'
     commandLine "git", "add", "-A"
 }
 
 task commitToGit(type: Exec) {
+    println(":commitToGit - ")
     description 'Commit git.'
     commandLine "git", "commit"
 }
 
 task pushToGit(type: Exec) {
+    println(":pushToGit - ")
     description 'Push git.'
     commandLine "git", "push"
 }
@@ -130,7 +133,7 @@ String increaseBuildVersion() {
     def versionName
     def gradlePropsFile = file('../gradle.properties')
     if (gradlePropsFile.isFile() && gradlePropsFile.canRead()) {
-        def Properties versionProps = new Properties()
+        Properties versionProps = new Properties()
         versionProps.load(new FileInputStream(gradlePropsFile))
         versionName = versionProps['VERSION_NAME']
         def patternVersionNumber = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)")
