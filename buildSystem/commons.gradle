@@ -42,7 +42,7 @@ task increaseLibraryVersion {
         createUpdateReadmeFileTask(versionName)
         createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
         createTagToGitTask(versionName, "Release candidate")
-        createPushAllTagsToGitTask(versionName)
+        createPushAllTagsToGitTask()
     }
     doLast {
         println(":increaseLibraryVersion - Incrementing library version...")
