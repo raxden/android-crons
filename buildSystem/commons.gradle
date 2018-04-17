@@ -41,6 +41,8 @@ task increaseBuildVersion {
     doFirst {
         createUpdateReadmeFileTask(versionName)
         createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
+        createTagToGitTask(versionName, "Release candidate")
+        createPushTagToGitTask(versionName)
     }
     doLast {
         println(":increaseBuildVersion - Incrementing build version...")
@@ -49,6 +51,8 @@ task increaseBuildVersion {
         tasks.addToGit.execute()
         tasks.commitToGitWithMessage.execute()
         tasks.pushToGit.execute()
+        tasks.createTagToGit.execute()
+        tasks.pushTagToGit.execute()
         println(":increaseBuildVersion - Build version incremented to " + versionName)
     }
 }
@@ -81,7 +85,7 @@ def createCommitToGitWithMessageTask(message) {
 }
 
 def createTagToGitTask(tag, message) {
-    return tasks.create(name: 'tagToGit', type: Exec) {
+    return tasks.create(name: 'createTagToGit', type: Exec) {
         description 'Tag git.'
         commandLine "git", "tag", "-a", tag, "-m", message
     }
