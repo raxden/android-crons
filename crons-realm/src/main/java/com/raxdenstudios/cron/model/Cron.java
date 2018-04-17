@@ -2,13 +2,10 @@ package com.raxdenstudios.cron.model;
 
 import android.app.AlarmManager;
 
-import org.parceler.Parcel;
-
 import io.realm.RealmModel;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.RealmClass;
 
-@Parcel
 @RealmClass
 public class Cron implements RealmModel {
 
