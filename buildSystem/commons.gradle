@@ -132,8 +132,9 @@ String increaseBuildVersion() {
     def versionName
     def gradlePropsFile = file('../gradle.properties')
     if (gradlePropsFile.isFile() && gradlePropsFile.canRead()) {
+        FileInputStream fis = new FileInputStream(gradlePropsFile)
         Properties versionProps = new Properties()
-        versionProps.load(new FileInputStream(gradlePropsFile))
+        versionProps.load(fis)
         versionName = versionProps['VERSION_NAME']
         def patternVersionNumber = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)")
         def matcherVersionNumber = patternVersionNumber.matcher(versionName)
@@ -145,6 +146,7 @@ String increaseBuildVersion() {
             versionProps['VERSION_NAME'] = matcherVersionNumber.replaceAll(versionName)
         }
         versionProps.store(gradlePropsFile.newWriter(), null)
+        fis.close()
     } else {
         throw new GradleException(":increaseBuildVersion - Could not read version.properties!")
     }
