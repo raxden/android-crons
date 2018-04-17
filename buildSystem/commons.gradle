@@ -1,4 +1,4 @@
-// v1.0.5
+// v1.0.5 
 import java.util.regex.Pattern
 
 task fetchFromGit(type: Exec) {
