@@ -1,5 +1,4 @@
-// v1.0.4
-
+// v1.0.5
 import java.util.regex.Pattern
 
 task fetchFromGit(type: Exec) {
@@ -22,16 +21,55 @@ task commitToGit(type: Exec) {
     commandLine "git", "commit"
 }
 
+task pushToGit(type: Exec) {
+    description 'Push git.'
+    commandLine "git", "push"
+}
+
+task uploadLibraryWithMessage {
+    doFirst {
+        def message = "$message"
+        createUploadLibraryToGitTask(message)
+        tasks.uploadLibraryToGit.execute()
+    }
+}
+
+task increaseBuildVersion {
+    doFirst {
+        println(":increaseBuildVersion - Incrementing build version...")
+        println(":increaseBuildVersion - Upload new build version to repository...")
+        def versionName = increaseBuildVersion()
+        createUpdateReadmeFileTask(versionName)
+        tasks.updateReadmeFile.execute()
+        tasks.addToGit.execute()
+        createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
+        tasks.commitToGitWithMessage.execute()
+        tasks.pushToGit.execute()
+        println(":increaseBuildVersion - Build version incremented to " + versionName)
+    }
+}
+
+task uploadLibrary {
+    doFirst {
+        createUploadLibraryToGitTask("Upload library (" + version + ")")
+        tasks.uploadLibraryToGit.execute()
+    }
+}
+
+task uploadRelease {
+    doFirst {
+        println(":uploadRelease - Upload release to repository...")
+        createUploadReleaseToGitTask(version, "Release " + version + " created")
+        tasks.uploadReleaseToGit.execute()
+        println(":uploadRelease - Release uploaded: " + version)
+    }
+}
+
 def createCommitToGitWithMessageTask(message) {
     return tasks.create(name: 'commitToGitWithMessage', type: Exec) {
         description 'Commit git.'
         commandLine "git", "commit", "-m", message
     }
-}
-
-task pushToGit(type: Exec) {
-    description 'Push git.'
-    commandLine "git", "push"
 }
 
 def createTagToGitTask(tag, message) {
@@ -86,33 +124,6 @@ def createUpdateReadmeFileTask(version) {
         }
         println(":updateReadmeFile - Readme file has been update")
     }
-}
-
-// gradlew uploadLibrary -Pmessage=messageToUpload
-task uploadLibraryWithMessage << {
-    def message = "$message"
-    createUploadLibraryToGitTask(message)
-    tasks.uploadLibraryToGit.execute()
-}
-
-task increaseBuildVersion << {
-    println(":increaseBuildVersion - Incrementing build version...")
-    def versionName = increaseBuildVersion()
-    createUpdateReadmeFileTask(versionName)
-    tasks.updateReadmeFile.execute()
-    println(":increaseBuildVersion - build version incremented to " + versionName)
-}
-
-task uploadLibrary << {
-    createUploadLibraryToGitTask("Upload library (" + version + ")")
-    tasks.uploadLibraryToGit.execute()
-}
-
-task uploadRelease << {
-    println(":uploadRelease - Upload release to repository...")
-    createUploadReleaseToGitTask(version, "Release " + version + " created")
-    tasks.uploadReleaseToGit.execute()
-    println(":uploadRelease - Release uploaded: " + version)
 }
 
 String increaseBuildVersion() {
