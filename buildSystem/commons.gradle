@@ -30,6 +30,8 @@ task uploadLibraryWithMessage {
     doFirst {
         def message = "$message"
         createUploadLibraryToGitTask(message)
+    }
+    doLast {
         tasks.uploadLibraryToGit.execute()
     }
 }
@@ -37,12 +39,12 @@ task uploadLibraryWithMessage {
 task increaseBuildVersion {
     def versionName = increaseBuildVersion()
     doFirst {
-        println(":increaseBuildVersion - Incrementing build version...")
-        println(":increaseBuildVersion - Upload new build version to repository...")
         createUpdateReadmeFileTask(versionName)
         createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
     }
     doLast {
+        println(":increaseBuildVersion - Incrementing build version...")
+        println(":increaseBuildVersion - Upload new build version to repository...")
         tasks.updateReadmeFile.execute()
         tasks.addToGit.execute()
         tasks.commitToGitWithMessage.execute()
@@ -54,14 +56,18 @@ task increaseBuildVersion {
 task uploadLibrary {
     doFirst {
         createUploadLibraryToGitTask("Upload library (" + version + ")")
+    }
+    doLast {
         tasks.uploadLibraryToGit.execute()
     }
 }
 
 task uploadRelease {
     doFirst {
-        println(":uploadRelease - Upload release to repository...")
         createUploadReleaseToGitTask(version, "Release " + version + " created")
+    }
+    doLast {
+        println(":uploadRelease - Upload release to repository...")
         tasks.uploadReleaseToGit.execute()
         println(":uploadRelease - Release uploaded: " + version)
     }
