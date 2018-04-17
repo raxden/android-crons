@@ -36,7 +36,7 @@ task uploadLibraryWithMessage {
     }
 }
 
-task increaseBuildVersion {
+task increaseLibraryVersion {
     def versionName = increaseBuildVersion()
     doFirst {
         createUpdateReadmeFileTask(versionName)
