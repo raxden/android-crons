@@ -35,5 +35,3 @@ dependencies {
     testImplementation deps.library_realm.testImplementation
     androidTestImplementation deps.library_realm.androidTestImplementation
 }
-
-apply from: '../buildSystem/commons.gradle'
