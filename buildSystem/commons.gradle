@@ -27,15 +27,16 @@ task deployLibrary() {
     doFirst {
         println("deployLibrary")
     }
+    dependsOn(createUpdateReadmeTask(VERSION_NAME))
     dependsOn(fetchFromGit)
     dependsOn(addToGit)
-    dependsOn(commitToGitWithMessageTask("Library version increased (" + VERSION_NAME + ")"))
+    dependsOn(createCommitToGitWithMessageTask("Library version increased (" + VERSION_NAME + ")"))
     dependsOn(pushToGit)
     dependsOn(createTagToGitTask(VERSION_NAME, "Release candidate"))
     dependsOn(createPushTagToGitTask(VERSION_NAME))
 }
 
-def commitToGitWithMessageTask(message) {
+def createCommitToGitWithMessageTask(message) {
     return tasks.create(name: 'commitToGitWithMessage', type: Exec) {
         description 'Commit git.'
         commandLine "git", "commit", "-m", message
@@ -56,3 +57,20 @@ def createPushTagToGitTask(tag) {
     }
 }
 
+def createUpdateReadmeTask(versionName) {
+    return tasks.create(name: 'updateReadme') {
+        println(":updateReadmeFile - Updating readme file...")
+        def readmeFile = file('README.md')
+        if (readmeFile.exists()) {
+            readmeFile.delete()
+        }
+        def readmeTemplateFile = file('README.template')
+        if (readmeTemplateFile.canRead()) {
+            def content = readmeTemplateFile.getText("UTF-8").replaceAll("\\{versionName\\}", versionName)
+            readmeFile = new File("README.md")
+            readmeFile.createNewFile()
+            readmeFile.write(content, "UTF-8")
+        }
+        println(":updateReadmeFile - Readme file has been update")
+    }
+}
