@@ -38,7 +38,6 @@ task deployLibrary() {
 
 def createCommitToGitWithMessageTask(message) {
     return tasks.create(name: 'commitToGitWithMessage', type: Exec) {
-        println(":createCommitToGitWithMessageTask - aaaaaaaaaae...")
         description 'Commit git.'
         commandLine "git", "commit", "-m", message
     }
@@ -60,18 +59,20 @@ def createPushTagToGitTask(tag) {
 
 def createUpdateReadmeTask(versionName) {
     return tasks.create(name: 'updateReadme') {
-        println(":updateReadmeFile - Updating readme file...")
-        def readmeFile = file('README.md')
-        if (readmeFile.exists()) {
-            readmeFile.delete()
+        doFirst {
+            println(":updateReadmeFile - Updating readme file...")
+            def readmeFile = file('README.md')
+            if (readmeFile.exists()) {
+                readmeFile.delete()
+            }
+            def readmeTemplateFile = file('README.template')
+            if (readmeTemplateFile.canRead()) {
+                def content = readmeTemplateFile.getText("UTF-8").replaceAll("\\{versionName\\}", versionName)
+                readmeFile = new File("README.md")
+                readmeFile.createNewFile()
+                readmeFile.write(content, "UTF-8")
+            }
+            println(":updateReadmeFile - Readme file has been update")
         }
-        def readmeTemplateFile = file('README.template')
-        if (readmeTemplateFile.canRead()) {
-            def content = readmeTemplateFile.getText("UTF-8").replaceAll("\\{versionName\\}", versionName)
-            readmeFile = new File("README.md")
-            readmeFile.createNewFile()
-            readmeFile.write(content, "UTF-8")
-        }
-        println(":updateReadmeFile - Readme file has been update")
     }
 }
