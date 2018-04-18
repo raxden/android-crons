@@ -42,7 +42,7 @@ task increaseLibraryVersion {
         createUpdateReadmeFileTask(versionName)
         createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
         createTagToGitTask(versionName, "Release candidate")
-        createPushAllTagsToGitTask()
+        createPushTagToGitTask(versionName)
     }
     doLast {
         println(":increaseLibraryVersion - Incrementing library version...")
@@ -52,7 +52,7 @@ task increaseLibraryVersion {
         tasks.commitToGitWithMessage.execute()
         tasks.pushToGit.execute()
         tasks.createTagToGit.execute()
-        tasks.pushAllTagsToGit.execute()
+        tasks.pushTagToGit.execute()
         println(":increaseBuildVersion - Library version incremented to " + versionName)
     }
 }
