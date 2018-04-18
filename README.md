@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-	    compile 'com.github.raxden:android-crons:4.0.30@aar'
+	    compile 'com.github.raxden:android-crons:4.0.32@aar'
 }
 ```
 
@@ -34,7 +34,7 @@ dependencies {
 <dependency>
 	    <groupId>com.github.raxden</groupId>
 	    <artifactId>AndroidNavigation</artifactId>
-	    <version>4.0.30</version>
+	    <version>4.0.32</version>
 </dependency>
 ```
 
