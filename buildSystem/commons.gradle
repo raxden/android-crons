@@ -36,25 +36,24 @@ task uploadLibraryWithMessage {
     }
 }
 
-task(increaseLibraryVersion) {
-    def versionName = increaseBuildVersion()
+task increaseLibraryVersion {
     doFirst {
+        def versionName = increaseBuildVersion()
         createUpdateReadmeFileTask(versionName)
-        createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
-        createTagToGitTask(versionName, "Release candidate")
-        createPushTagToGitTask(versionName)
     }
-    doLast {
-        println(":increaseLibraryVersion - Incrementing library version...")
-        println(":increaseLibraryVersion - Upload new library version to repository...")
-        tasks.updateReadmeFile.execute()
-        tasks.addToGit.execute()
-        tasks.commitToGitWithMessage.execute()
-        tasks.pushToGit.execute()
-        tasks.createTagToGit.execute()
-        tasks.pushTagToGit.execute()
-        println(":increaseBuildVersion - Library version incremented to " + versionName)
-    }
+    dependsOn updateReadmeFile
+//    createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
+//    createTagToGitTask(versionName, "Release candidate")
+//    createPushTagToGitTask(versionName)
+//    println(":increaseLibraryVersion - Incrementing library version...")
+//    println(":increaseLibraryVersion - Upload new library version to repository...")
+//    dependsOn updateReadmeFile
+//    dependsOn addToGit
+//    dependsOn commitToGitWithMessage
+//    dependsOn pushToGit
+//    dependsOn createTagToGit
+//    dependsOn pushTagToGit
+//    println(":increaseBuildVersion - Library version incremented to " + versionName)
 }
 
 task uploadLibrary {
@@ -128,13 +127,13 @@ def createUploadReleaseToGitTask(tag, message) {
 }
 
 def createUpdateReadmeFileTask(version) {
-    return tasks.create(name: 'updateReadmeFile') {
+    return tasks.create(name: 'updateReadmeFile', overwrite: true) {
         println(":updateReadmeFile - Updating readme file...")
-        def readmeFile = file('../README.md')
+        def readmeFile = file('README.md')
         if (readmeFile.exists()) {
             readmeFile.delete()
         }
-        def readmeTemplateFile = file('../README.template')
+        def readmeTemplateFile = file('README.template')
         if (readmeTemplateFile.canRead()) {
             def content = readmeTemplateFile.getText("UTF-8").replaceAll("\\{versionName\\}", version)
             readmeFile = new File("README.md")
@@ -147,7 +146,7 @@ def createUpdateReadmeFileTask(version) {
 
 String increaseBuildVersion() {
     def versionName
-    def gradlePropsFile = file('../gradle.properties')
+    def gradlePropsFile = file('gradle.properties')
     if (gradlePropsFile.isFile() && gradlePropsFile.canRead()) {
         FileInputStream fis = new FileInputStream(gradlePropsFile)
         Properties versionProps = new Properties()

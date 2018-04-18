@@ -32,5 +32,3 @@ dependencies {
     testImplementation deps.library.testImplementation
     androidTestImplementation deps.library.androidTestImplementation
 }
-
-apply from: '../buildSystem/commons.gradle'
