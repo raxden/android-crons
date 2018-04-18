@@ -31,7 +31,7 @@ task deployLibrary() {
     dependsOn(addToGit)
     dependsOn(commitToGitWithMessageTask("Library version increased (" + VERSION_NAME + ")"))
     dependsOn(pushToGit)
-    dependsOn(createTagToGitTask(VERSION_NAME, ""))
+    dependsOn(createTagToGitTask(VERSION_NAME, "Release candidate"))
     dependsOn(createPushTagToGitTask(VERSION_NAME))
 }
 
