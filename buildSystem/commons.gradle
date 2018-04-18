@@ -38,6 +38,7 @@ task deployLibrary() {
 
 def createCommitToGitWithMessageTask(message) {
     return tasks.create(name: 'commitToGitWithMessage', type: Exec) {
+        println(":createCommitToGitWithMessageTask - aaaaaaaaaae...")
         description 'Commit git.'
         commandLine "git", "commit", "-m", message
     }
