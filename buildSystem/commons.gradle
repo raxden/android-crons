@@ -26,81 +26,72 @@ task pushToGit(type: Exec) {
     commandLine "git", "push"
 }
 
-task uploadLibraryWithMessage {
-    doFirst {
-        def message = "$message"
-        createUploadLibraryToGitTask(message)
-    }
-    doLast {
-        tasks.uploadLibraryToGit.execute()
-    }
-}
-
-task increaseLibraryVersion {
-    doFirst {
-        def versionName = increaseBuildVersion()
-        createUpdateReadmeFileTask(versionName)
-    }
-    dependsOn updateReadmeFile
-//    createCommitToGitWithMessageTask("Build version increased (" + versionName + ")")
-//    createTagToGitTask(versionName, "Release candidate")
-//    createPushTagToGitTask(versionName)
-//    println(":increaseLibraryVersion - Incrementing library version...")
-//    println(":increaseLibraryVersion - Upload new library version to repository...")
-//    dependsOn updateReadmeFile
-//    dependsOn addToGit
-//    dependsOn commitToGitWithMessage
-//    dependsOn pushToGit
-//    dependsOn createTagToGit
-//    dependsOn pushTagToGit
-//    println(":increaseBuildVersion - Library version incremented to " + versionName)
-}
-
 task uploadLibrary {
     doFirst {
         createUploadLibraryToGitTask("Upload library (" + version + ")")
-    }
-    doLast {
         tasks.uploadLibraryToGit.execute()
     }
 }
 
 task uploadRelease {
     doFirst {
-        createUploadReleaseToGitTask(version, "Release " + version + " created")
-    }
-    doLast {
         println(":uploadRelease - Upload release to repository...")
+        createUploadReleaseToGitTask(version, "Release " + version + " created")
         tasks.uploadReleaseToGit.execute()
         println(":uploadRelease - Release uploaded: " + version)
     }
 }
 
+task increaseLibraryVersion() {
+    doFirst {
+        def versionName = increaseBuildVersion()
+        println(":increaseLibraryVersion - Incrementing library version...")
+        println(":increaseLibraryVersion - Upload new library version to repository...")
+        createUpdateReadmeFileTask(versionName)
+        addToGit.execute()
+        createCommitToGitWithMessageTask("Build version increased (" + versionName + ")").execute()
+        createTagToGitTask(versionName, "Release candidate")
+        createPushTagToGitTask(versionName)
+        println(":increaseBuildVersion - Library version incremented to " + versionName)
+    }
+}
+
 def createCommitToGitWithMessageTask(message) {
     return tasks.create(name: 'commitToGitWithMessage', type: Exec) {
-        description 'Commit git.'
+        description "Commit git."
         commandLine "git", "commit", "-m", message
     }
 }
 
 def createTagToGitTask(tag, message) {
     return tasks.create(name: 'createTagToGit', type: Exec) {
-        description 'Tag git.'
+        description "Tag git."
         commandLine "git", "tag", "-a", tag, "-m", message
     }
 }
 
 def createPushTagToGitTask(tag) {
     return tasks.create(name: 'pushTagToGit', type: Exec) {
-        description 'Push tag to git.'
+        description "Push tag to git."
         commandLine "git", "push", "origin", tag
     }
 }
 
-def createPushAllTagsToGitTask() {
-    return tasks.create(name: 'pushAllTagsToGit', type: Exec) {
-        description 'Push tags to git.'
-        commandLine "git", "push", "--tags"
+def createUpdateReadmeFileTask(version) {
+    return tasks.create(name: 'updateReadmeFile') {
+        println(":updateReadmeFile - Updating readme file...")
+        def readmeFile = file('README.md')
+        if (readmeFile.exists()) {
+            readmeFile.delete()
+        }
+        def readmeTemplateFile = file('README.template')
+        if (readmeTemplateFile.canRead()) {
+            def content = readmeTemplateFile.getText("UTF-8").replaceAll("\\{versionName\\}", version)
+            readmeFile = new File("README.md")
+            readmeFile.createNewFile()
+            readmeFile.write(content, "UTF-8")
+        }
+        println(":updateReadmeFile - Readme file has been update")
     }
 }
 
@@ -123,24 +114,6 @@ def createUploadReleaseToGitTask(tag, message) {
         tasks.tagToGit.execute()
         createPushTagToGitTask(tag)
         tasks.pushTagToGit.execute()
-    }
-}
-
-def createUpdateReadmeFileTask(version) {
-    return tasks.create(name: 'updateReadmeFile', overwrite: true) {
-        println(":updateReadmeFile - Updating readme file...")
-        def readmeFile = file('README.md')
-        if (readmeFile.exists()) {
-            readmeFile.delete()
-        }
-        def readmeTemplateFile = file('README.template')
-        if (readmeTemplateFile.canRead()) {
-            def content = readmeTemplateFile.getText("UTF-8").replaceAll("\\{versionName\\}", version)
-            readmeFile = new File("README.md")
-            readmeFile.createNewFile()
-            readmeFile.write(content, "UTF-8")
-        }
-        println(":updateReadmeFile - Readme file has been update")
     }
 }
 
