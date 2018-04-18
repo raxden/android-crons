@@ -10,6 +10,11 @@ task addToGit(type: Exec) {
     commandLine "git", "add", "-A"
 }
 
+task pushToGit(type: Exec) {
+    description 'Push git.'
+    commandLine "git", "push"
+}
+
 task hola() {
     println("hola")
 }
@@ -24,7 +29,10 @@ task deployLibrary() {
     }
     dependsOn(fetchFromGit)
     dependsOn(addToGit)
-    dependsOn(commitToGitWithMessageTask("Build version increased (" + VERSION_NAME + ")"))
+    dependsOn(commitToGitWithMessageTask("Library version increased (" + VERSION_NAME + ")"))
+    dependsOn(pushToGit)
+    dependsOn(createTagToGitTask(VERSION_NAME, ""))
+    dependsOn(createPushTagToGitTask(VERSION_NAME))
 }
 
 def commitToGitWithMessageTask(message) {
@@ -33,3 +41,18 @@ def commitToGitWithMessageTask(message) {
         commandLine "git", "commit", "-m", message
     }
 }
+
+def createTagToGitTask(tag, message) {
+    return tasks.create(name: 'createTagToGit', type: Exec) {
+        description 'Tag git.'
+        commandLine "git", "tag", "-a", tag, "-m", message
+    }
+}
+
+def createPushTagToGitTask(tag) {
+    return tasks.create(name: 'pushTagToGit', type: Exec) {
+        description 'Push tag to git.'
+        commandLine "git", "push", "origin", tag
+    }
+}
+
