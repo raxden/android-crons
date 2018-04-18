@@ -24,7 +24,7 @@ task deployLibrary() {
     }
     dependsOn(fetchFromGit)
     dependsOn(addToGit)
-    dependsOn(commitToGitWithMessageTask("test"))
+    dependsOn(commitToGitWithMessageTask("Build version increased (" + VERSION_NAME + ")"))
 }
 
 def commitToGitWithMessageTask(message) {
