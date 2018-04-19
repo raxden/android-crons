@@ -2,23 +2,31 @@
 import java.util.regex.Pattern
 
 task fetchFromGit(type: Exec) {
-    description 'Fetch git.'
-    commandLine "git", "fetch"
+    doFirst {
+        description 'Fetch git.'
+        commandLine "git", "fetch"
+    }
 }
 
 task pullFromGit(type: Exec) {
-    description 'Pulls git.'
-    commandLine "git", "pull"
+    doFirst {
+        description 'Pulls git.'
+        commandLine "git", "pull"
+    }
 }
 
 task addToGit(type: Exec) {
-    description 'Add git.'
-    commandLine "git", "add", "-A"
+    doFirst {
+        description 'Add git.'
+        commandLine "git", "add", "-A"
+    }
 }
 
 task pushToGit(type: Exec) {
-    description 'Push git.'
-    commandLine "git", "push"
+    doFirst {
+        description 'Push git.'
+        commandLine "git", "push"
+    }
 }
 
 project.ext.libraryVersion = VERSION_NAME
