@@ -54,7 +54,7 @@ task pushTagLibraryVersion(type: Exec) {
 task deployLibrary() {
     doFirst {
         println(":deployLibrary - Library version: " + project.ext.libraryVersion)
-        task(pushTagLibraryVersion())
+        task(pushTagLibraryVersion)
     }
     dependsOn(fetchFromGit)
     dependsOn(pullFromGit)
