@@ -16,17 +16,19 @@ task addToGit(type: Exec) {
     commandLine "git", "add", "-A"
 }
 
-task commitToGit(type: Exec) {
-    description 'Commit git.'
-    commandLine "git", "commit"
-}
-
 task pushToGit(type: Exec) {
     description 'Push git.'
     commandLine "git", "push"
 }
 
 project.ext.libraryVersion = ""
+
+task commitLibraryVersion(type: Exec) {
+    doFirst {
+        description 'Add git.'
+        commandLine "git", "commit", "-m", project.ext.libraryVersion
+    }
+}
 
 task increaseLibraryVersion() {
     doFirst {
@@ -44,12 +46,12 @@ task deployLibrary() {
     dependsOn(pullFromGit)
     dependsOn(increaseLibraryVersion)
     dependsOn(addToGit)
-    dependsOn(commitToGit)
+    dependsOn(commitLibraryVersion)
 
     pullFromGit.mustRunAfter fetchFromGit
     increaseLibraryVersion.mustRunAfter pullFromGit
     addToGit.mustRunAfter increaseLibraryVersion
-    commitToGit.mustRunAfter addToGit
+    commitLibraryVersion.mustRunAfter addToGit
 }
 
 String increaseLibraryVersion() {
