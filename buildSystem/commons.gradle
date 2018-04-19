@@ -47,6 +47,7 @@ task deployLibrary() {
     dependsOn(increaseLibraryVersion)
     dependsOn(addToGit)
     dependsOn(commitLibraryVersion)
+    dependsOn(pushToGit)
 
     pullFromGit.mustRunAfter fetchFromGit
     increaseLibraryVersion.mustRunAfter pullFromGit
