@@ -52,10 +52,6 @@ task pushTagLibraryVersion(type: Exec) {
     }
 }
 task deployLibrary() {
-    doFirst {
-        println(":deployLibrary - Library version: " + project.ext.libraryVersion)
-        pushTagLibraryVersion
-    }
     dependsOn(fetchFromGit)
     dependsOn(pullFromGit)
     dependsOn(increaseLibraryVersion)
@@ -63,7 +59,7 @@ task deployLibrary() {
     dependsOn(commitLibraryVersion)
     dependsOn(pushToGit)
     dependsOn(tagLibraryVersion)
-//    dependsOn(pushTagLibraryVersion)
+    dependsOn(pushTagLibraryVersion)
 
     pullFromGit.mustRunAfter fetchFromGit
     increaseLibraryVersion.mustRunAfter pullFromGit
@@ -71,7 +67,7 @@ task deployLibrary() {
     commitLibraryVersion.mustRunAfter addToGit
     pushToGit.mustRunAfter commitLibraryVersion
     tagLibraryVersion.mustRunAfter pushToGit
-//    pushTagLibraryVersion.mustRunAfter tagLibraryVersion
+    pushTagLibraryVersion.mustRunAfter tagLibraryVersion
 }
 
 String increaseLibraryVersion() {
