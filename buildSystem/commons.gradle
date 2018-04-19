@@ -21,20 +21,20 @@ task pushToGit(type: Exec) {
     commandLine "git", "push"
 }
 
-project.ext.libraryVersion = ""
-
-task commitLibraryVersion(type: Exec) {
-    doFirst {
-        description 'Add git.'
-        commandLine "git", "commit", "-m", project.ext.libraryVersion
-    }
-}
+project.ext.libraryVersion = VERSION_NAME
 
 task increaseLibraryVersion() {
     doFirst {
         println(":increaseLibraryVersion - Incrementing library version...")
         project.ext.libraryVersion = increaseLibraryVersion()
         println(":increaseLibraryVersion - Library version incremented to " + project.ext.libraryVersion)
+    }
+}
+
+task commitLibraryVersion(type: Exec) {
+    doFirst {
+        description 'Add git.'
+        commandLine "git", "commit", "-m", project.ext.libraryVersion
     }
 }
 
