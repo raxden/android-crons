@@ -17,6 +17,7 @@ package com.raxdenstudios.cron.data.factory
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
 import com.raxdenstudios.cron.data.CronService
 import com.raxdenstudios.cron.model.Cron
 import com.raxdenstudios.preferences.AdvancedPreferences
@@ -29,19 +30,19 @@ class CronPreferencesServiceImpl : CronService {
     private val persistentClass: KClass<Cron>
     private val advancedPreferences: AdvancedPreferences
 
-    constructor(context: Context) {
+    constructor(context: Context, gson: Gson = Gson()) {
         persistentClass = Cron::class
-        advancedPreferences = AdvancedPreferences(context)
+        advancedPreferences = AdvancedPreferences(context, gson)
     }
 
-    constructor(context: Context, name: String, mode: Int) {
+    constructor(context: Context, name: String, mode: Int, gson: Gson = Gson()) {
         persistentClass = Cron::class
-        advancedPreferences = AdvancedPreferences(context, name, mode)
+        advancedPreferences = AdvancedPreferences(context, name, mode, gson)
     }
 
-    constructor(preferences: SharedPreferences) {
+    constructor(preferences: SharedPreferences, gson: Gson = Gson()) {
         persistentClass = Cron::class
-        advancedPreferences = AdvancedPreferences(preferences)
+        advancedPreferences = AdvancedPreferences(preferences, gson)
     }
 
     override fun getAll(): Maybe<List<Cron>> {
@@ -94,7 +95,7 @@ class CronPreferencesServiceImpl : CronService {
 
     private fun getCronListFromPreferences(): List<Cron> {
         val cronList = ArrayList<Cron>()
-        for (key in advancedPreferences.all.keys) {
+        for (key in advancedPreferences.getAll().keys) {
             if (key.contains(persistentClass.java.simpleName.plus("_"))) {
                 cronList.add(advancedPreferences.get(key, persistentClass.java, Cron.Builder(0).create()))
             }

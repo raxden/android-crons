@@ -37,19 +37,19 @@ abstract class CronProcedureService : Service() {
 
         Maybe.just(intent)
                 .map { intent?.extras?.getLong(Cron::class.java.simpleName) }
-                .filter({ t -> t != 0L })
-                .flatMap { t -> cronService.get(t).toMaybe() }
-                .filter({ t -> t.status})
-                .flatMap { t ->
-                    Log.d(TAG, "Cron[${t.id}] launched at ${CronUtils.currentDateTime()}")
-                    if (t.interval > 0) {
-                        t.triggerAtTime = Calendar.getInstance().timeInMillis + t.interval
-                        cronHandler.start(t).toSingleDefault(t).toMaybe()
+                .filter { it != 0L }
+                .flatMap { cronService.get(it!!).toMaybe() }
+                .filter{ it.status }
+                .flatMap {
+                    Log.d(TAG, "Cron[${it.id}] launched at ${CronUtils.currentDateTime()}")
+                    if (it.interval > 0) {
+                        it.triggerAtTime = Calendar.getInstance().timeInMillis + it.interval
+                        cronHandler.start(it).toSingleDefault(it).toMaybe()
                     } else {
-                        Maybe.just(t)
+                        Maybe.just(it)
                     }
                 }
-                .subscribeWith(object: DisposableMaybeObserver<Cron>() {
+                .subscribeWith(object : DisposableMaybeObserver<Cron>() {
                     override fun onSuccess(t: Cron) {
                         onCronLaunched(t)
                         dispose()

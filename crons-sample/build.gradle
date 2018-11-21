@@ -5,7 +5,6 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         applicationId "com.raxdenstudios.crons.sample"
@@ -31,13 +30,8 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':crons')
-//    implementation project(':crons-realm')
 
-    implementation deps.sample.implementation
-    annotationProcessor deps.sample.annotationProcessor
-    kapt deps.sample.kapt
-    compileOnly deps.sample.compileOnly
-    testImplementation deps.sample.testImplementation
-    androidTestImplementation deps.sample.androidTestImplementation
+    rootProject.appDependencies.each {
+        add(it.configuration, it.dependency, it.options)
+    }
 }
