@@ -45,52 +45,25 @@ class CronPreferencesServiceImpl : CronService {
         advancedPreferences = AdvancedPreferences(preferences, gson)
     }
 
-    override fun getAll(): Maybe<List<Cron>> {
-        return Maybe.create { emitter: MaybeEmitter<List<Cron>> ->
-            try {
-                val cronList = getCronListFromPreferences()
-                if (cronList.isNotEmpty())
-                    emitter.onSuccess(cronList)
-                emitter.onComplete()
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    override fun getAll(): Maybe<List<Cron>> = Maybe.create { emitter: MaybeEmitter<List<Cron>> ->
+        val cronList = getCronListFromPreferences()
+        if (cronList.isNotEmpty()) emitter.onSuccess(cronList)
+        emitter.onComplete()
     }
 
-    override fun get(id: Long): Single<Cron> {
-        return Single.create { emitter: SingleEmitter<Cron> ->
-            try {
-                getCronFromPreferences(id)?.let { cron -> emitter.onSuccess(cron) }
-                        ?: throw Exception("Cron with $id not found")
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    override fun get(id: Long): Single<Cron> = Single.create { emitter: SingleEmitter<Cron> ->
+        getCronFromPreferences(id)?.let { cron -> emitter.onSuccess(cron) }
+                ?: emitter.onError(Exception("Cron with $id not found"))
     }
 
-    override fun save(cron: Cron): Single<Cron> {
-        return Single.create<Cron> { emitter ->
-            try {
-                saveCronToPreferences(cron)?.let { cron -> emitter.onSuccess(cron) }
-                        ?: throw Exception("Cron with $cron.id could not save")
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    override fun save(cron: Cron): Single<Cron> = Single.create<Cron> { emitter ->
+        saveCronToPreferences(cron)?.let { cron -> emitter.onSuccess(cron) }
+                ?: emitter.onError(Exception("Cron with $cron.id could not save"))
     }
 
-    override fun delete(id: Long): Completable {
-        return Completable.create { emitter ->
-            try {
-                if (deleteCronFromPreferences(id))
-                    emitter.onComplete()
-                else
-                    throw Exception("Cron with $id not found")
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    override fun delete(id: Long): Completable = Completable.create { emitter ->
+        if (deleteCronFromPreferences(id)) emitter.onComplete()
+        else emitter.onError(Exception("Cron with $id not found"))
     }
 
     private fun getCronListFromPreferences(): List<Cron> {
@@ -127,14 +100,10 @@ class CronPreferencesServiceImpl : CronService {
         return false
     }
 
-    private fun getKey(id: Long): String {
-        return persistentClass.java.simpleName.plus("_$id")
-    }
+    private fun getKey(id: Long): String = persistentClass.java.simpleName.plus("_$id")
 
     private fun increasePrimaryKey(cron: Cron) {
-        if (cron.id == 0L) {
-            cron.id = getCronListFromPreferences().lastOrNull()?.id?.plus(1) ?: 1
-        }
+        if (cron.id == 0L) cron.id = getCronListFromPreferences().lastOrNull()?.id?.plus(1) ?: 1
     }
 
 }
