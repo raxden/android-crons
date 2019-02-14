@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-	    compile 'com.github.raxden:android-crons:4.0.6@aar'
+	    compile 'com.github.raxden:android-crons:4.0.7@aar'
 }
 ```
 
@@ -34,7 +34,7 @@ dependencies {
 <dependency>
 	    <groupId>com.github.raxden</groupId>
 	    <artifactId>android-crons</artifactId>
-	    <version>4.0.6</version>
+	    <version>4.0.7</version>
 </dependency>
 ```
 
