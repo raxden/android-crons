@@ -18,11 +18,11 @@ import java.util.*
 
 abstract class CronProcedureService : Service() {
 
-    private val cronService: CronService by lazy {
+    open val cronService: CronService by lazy {
         CronFactoryService(this)
     }
 
-    private val cronHandler: CronHandler by lazy {
+    open val cronHandler: CronHandler by lazy {
         CronHandler(this, cronService)
     }
 
@@ -39,7 +39,7 @@ abstract class CronProcedureService : Service() {
                 .map { intent?.extras?.getLong(Cron::class.java.simpleName) }
                 .filter { it != 0L }
                 .flatMap { cronService.get(it!!).toMaybe() }
-                .filter{ it.status }
+                .filter { it.status }
                 .flatMap {
                     Log.d(TAG, "Cron[${it.id}] launched at ${CronUtils.currentDateTime()}")
                     if (it.interval > 0) {
