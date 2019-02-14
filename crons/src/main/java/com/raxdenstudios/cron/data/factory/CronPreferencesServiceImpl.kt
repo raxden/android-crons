@@ -45,6 +45,11 @@ class CronPreferencesServiceImpl : CronService {
         advancedPreferences = AdvancedPreferences(preferences, gson)
     }
 
+    constructor(preferences: AdvancedPreferences) {
+        persistentClass = Cron::class
+        advancedPreferences = preferences
+    }
+
     override fun getAll(): Maybe<List<Cron>> = Maybe.create { emitter: MaybeEmitter<List<Cron>> ->
         val cronList = getCronListFromPreferences()
         if (cronList.isNotEmpty()) emitter.onSuccess(cronList)
