@@ -35,36 +35,36 @@ abstract class CronProcedureService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        Maybe.just(intent)
-                .map { intent?.extras?.getLong(Cron::class.java.simpleName) }
-                .filter { it != 0L }
-                .flatMap { cronService.get(it!!).toMaybe() }
-                .filter { it.status }
-                .flatMap {
-                    Log.d(TAG, "Cron[${it.id}] launched at ${CronUtils.currentDateTime()}")
-                    if (it.interval > 0) {
-                        it.triggerAtTime = Calendar.getInstance().timeInMillis + it.interval
-                        cronHandler.start(it).toSingleDefault(it).toMaybe()
-                    } else {
-                        Maybe.just(it)
+        intent?.extras?.getLong(Cron::class.java.simpleName).let { id ->
+            Maybe.just(id)
+                    .filter { it != 0L }
+                    .flatMap { cronService.get(it).toMaybe() }
+                    .filter { it.status }
+                    .flatMap {
+                        Log.d(TAG, "Cron[${it.id}] launched at ${CronUtils.currentDateTime()}")
+                        if (it.interval > 0) {
+                            it.triggerAtTime = Calendar.getInstance().timeInMillis + it.interval
+                            cronHandler.start(it).toSingleDefault(it).toMaybe()
+                        } else {
+                            Maybe.just(it)
+                        }
                     }
-                }
-                .subscribeWith(object : DisposableMaybeObserver<Cron>() {
-                    override fun onSuccess(t: Cron) {
-                        onCronLaunched(t)
-                        dispose()
-                    }
+                    .subscribeWith(object : DisposableMaybeObserver<Cron>() {
+                        override fun onSuccess(t: Cron) {
+                            onCronLaunched(t)
+                            dispose()
+                        }
 
-                    override fun onComplete() {
-                        dispose()
-                    }
+                        override fun onComplete() {
+                            dispose()
+                        }
 
-                    override fun onError(e: Throwable) {
-                        Log.e(TAG, e.message, e)
-                        dispose()
-                    }
-                })
-
+                        override fun onError(e: Throwable) {
+                            Log.e(TAG, e.message, e)
+                            dispose()
+                        }
+                    })
+        }
         return START_STICKY
     }
 
