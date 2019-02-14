@@ -47,7 +47,10 @@ object CronUtils {
             action = getPackageName(context) + ".CRON"
             putExtra(Cron::class.java.simpleName, cron.id)
         }
-        return PendingIntent.getService(context, cron.id.toInt(), intent, 0)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            PendingIntent.getForegroundService(context, cron.id.toInt(), intent, 0)
+        else
+            PendingIntent.getService(context, cron.id.toInt(), intent, 0)
     }
 
     private fun getPackageName(context: Context) = context.packageManager.getPackageInfo(context.packageName, 0).packageName
