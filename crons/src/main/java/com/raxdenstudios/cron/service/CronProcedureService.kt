@@ -46,7 +46,7 @@ abstract class CronProcedureService : Service() {
                             it.triggerAtTime = Calendar.getInstance().timeInMillis + it.interval
                             cronHandler.start(it).toSingleDefault(it).toMaybe()
                         } else {
-                            Maybe.just(it)
+                            cronService.delete(it.id).toSingleDefault(it).toMaybe()
                         }
                     }
                     .subscribeWith(object : DisposableMaybeObserver<Cron>() {
