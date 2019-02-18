@@ -1,6 +1,7 @@
 package com.raxdenstudios.sample
 
 import android.app.Application
+import com.raxdenstudios.cron.CronManager
 
 /**
  * Created by agomez on 26/02/2016.
@@ -13,6 +14,10 @@ class SampleApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        CronManager.Builder()
+                .build()
+                .init(this)
 
         //        Realm.init(this);
         //        RealmConfiguration config = new RealmConfiguration.Builder()
