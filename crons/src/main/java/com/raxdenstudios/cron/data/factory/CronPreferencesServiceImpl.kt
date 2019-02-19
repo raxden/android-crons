@@ -51,9 +51,7 @@ class CronPreferencesServiceImpl : CronService {
     }
 
     override fun getAll(): Maybe<List<Cron>> = Maybe.create { emitter: MaybeEmitter<List<Cron>> ->
-        val cronList = getCronListFromPreferences()
-        if (cronList.isNotEmpty()) emitter.onSuccess(cronList)
-        emitter.onComplete()
+        emitter.onSuccess(getCronListFromPreferences())
     }
 
     override fun get(id: Long): Single<Cron> = Single.create { emitter: SingleEmitter<Cron> ->
