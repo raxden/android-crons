@@ -52,18 +52,17 @@ class CronHandler(val context: Context, private val cronService: CronService = C
                 }
     }
 
-    fun removeCronListAndPersist(cronList: List<Cron>): Completable {
+    private fun removeCronListAndPersist(cronList: List<Cron>): Completable {
+        if (cronList.isEmpty()) return Completable.complete()
         val finishCronList = mutableListOf<Single<Cron>>()
         for (cron in cronList) {
             finishCronList.add(finish(cron.id).toSingleDefault(cron).subscribeOn(Schedulers.io()))
         }
-        return if (finishCronList.isNotEmpty())
-            Single.zip(finishCronList, Function<Array<Any>, Boolean> { true }).toCompletable()
-        else
-            Completable.complete()
+        return Single.zip(finishCronList, Function<Array<Any>, Boolean> { true }).toCompletable()
     }
 
-    fun updateTriggerAtTimeFromCronListAndPersist(cronList: List<Cron>): Completable {
+    private fun updateTriggerAtTimeFromCronListAndPersist(cronList: List<Cron>): Completable {
+        if (cronList.isEmpty()) return Completable.complete()
         val now = Calendar.getInstance().timeInMillis
         for (cron in cronList) {
             var triggerAtTime = cron.triggerAtTime
