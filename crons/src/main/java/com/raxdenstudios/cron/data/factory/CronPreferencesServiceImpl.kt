@@ -17,6 +17,7 @@ package com.raxdenstudios.cron.data.factory
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.gson.Gson
 import com.raxdenstudios.cron.data.CronService
 import com.raxdenstudios.cron.model.Cron
 import com.raxdenstudios.preferences.AdvancedPreferences
@@ -29,72 +30,48 @@ class CronPreferencesServiceImpl : CronService {
     private val persistentClass: KClass<Cron>
     private val advancedPreferences: AdvancedPreferences
 
-    constructor(context: Context) {
+    constructor(context: Context, gson: Gson = Gson()) {
         persistentClass = Cron::class
-        advancedPreferences = AdvancedPreferences(context)
+        advancedPreferences = AdvancedPreferences(context, gson)
     }
 
-    constructor(context: Context, name: String, mode: Int) {
+    constructor(context: Context, name: String, mode: Int, gson: Gson = Gson()) {
         persistentClass = Cron::class
-        advancedPreferences = AdvancedPreferences(context, name, mode)
+        advancedPreferences = AdvancedPreferences(context, name, mode, gson)
     }
 
-    constructor(preferences: SharedPreferences) {
+    constructor(preferences: SharedPreferences, gson: Gson = Gson()) {
         persistentClass = Cron::class
-        advancedPreferences = AdvancedPreferences(preferences)
+        advancedPreferences = AdvancedPreferences(preferences, gson)
     }
 
-    override fun getAll(): Maybe<List<Cron>> {
-        return Maybe.create { emitter: MaybeEmitter<List<Cron>> ->
-            try {
-                val cronList = getCronListFromPreferences()
-                if (cronList.isNotEmpty())
-                    emitter.onSuccess(cronList)
-                emitter.onComplete()
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    constructor(preferences: AdvancedPreferences) {
+        persistentClass = Cron::class
+        advancedPreferences = preferences
     }
 
-    override fun get(id: Long): Single<Cron> {
-        return Single.create { emitter: SingleEmitter<Cron> ->
-            try {
-                getCronFromPreferences(id)?.let { cron -> emitter.onSuccess(cron) }
-                        ?: throw Exception("Cron with $id not found")
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    override fun getAll(): Maybe<List<Cron>> = Maybe.create { emitter: MaybeEmitter<List<Cron>> ->
+        emitter.onSuccess(getCronListFromPreferences())
     }
 
-    override fun save(cron: Cron): Single<Cron> {
-        return Single.create<Cron> { emitter ->
-            try {
-                saveCronToPreferences(cron)?.let { cron -> emitter.onSuccess(cron) }
-                        ?: throw Exception("Cron with $cron.id could not save")
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    override fun get(id: Long): Single<Cron> = Single.create { emitter: SingleEmitter<Cron> ->
+        getCronFromPreferences(id)?.let { cron -> emitter.onSuccess(cron) }
+                ?: emitter.onError(Exception("Cron with $id not found"))
     }
 
-    override fun delete(id: Long): Completable {
-        return Completable.create { emitter ->
-            try {
-                if (deleteCronFromPreferences(id))
-                    emitter.onComplete()
-                else
-                    throw Exception("Cron with $id not found")
-            } catch (e: Exception) {
-                emitter.onError(e)
-            }
-        }
+    override fun save(cron: Cron): Single<Cron> = Single.create<Cron> { emitter ->
+        saveCronToPreferences(cron)?.let { cron -> emitter.onSuccess(cron) }
+                ?: emitter.onError(Exception("Cron with $cron.id could not save"))
+    }
+
+    override fun delete(id: Long): Completable = Completable.create { emitter ->
+        if (deleteCronFromPreferences(id)) emitter.onComplete()
+        else emitter.onError(Exception("Cron with $id not found"))
     }
 
     private fun getCronListFromPreferences(): List<Cron> {
         val cronList = ArrayList<Cron>()
-        for (key in advancedPreferences.all.keys) {
+        for (key in advancedPreferences.getAll().keys) {
             if (key.contains(persistentClass.java.simpleName.plus("_"))) {
                 cronList.add(advancedPreferences.get(key, persistentClass.java, Cron.Builder(0).create()))
             }
@@ -126,14 +103,10 @@ class CronPreferencesServiceImpl : CronService {
         return false
     }
 
-    private fun getKey(id: Long): String {
-        return persistentClass.java.simpleName.plus("_$id")
-    }
+    private fun getKey(id: Long): String = persistentClass.java.simpleName.plus("_$id")
 
     private fun increasePrimaryKey(cron: Cron) {
-        if (cron.id == 0L) {
-            cron.id = getCronListFromPreferences().lastOrNull()?.id?.plus(1) ?: 1
-        }
+        if (cron.id == 0L) cron.id = getCronListFromPreferences().lastOrNull()?.id?.plus(1) ?: 1
     }
 
 }

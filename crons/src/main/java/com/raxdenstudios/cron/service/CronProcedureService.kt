@@ -13,16 +13,17 @@ import com.raxdenstudios.cron.data.factory.CronFactoryService
 import com.raxdenstudios.cron.model.Cron
 import com.raxdenstudios.cron.utils.CronUtils
 import io.reactivex.Maybe
+import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableMaybeObserver
 import java.util.*
 
 abstract class CronProcedureService : Service() {
 
-    private val cronService: CronService by lazy {
+    open val cronService: CronService by lazy {
         CronFactoryService(this)
     }
 
-    private val cronHandler: CronHandler by lazy {
+    open val cronHandler: CronHandler by lazy {
         CronHandler(this, cronService)
     }
 
@@ -34,22 +35,28 @@ abstract class CronProcedureService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        intent?.extras?.getLong(Cron::class.java.simpleName)?.let {
+            handleCron(it)
+        }
+        return START_STICKY
+    }
 
-        Maybe.just(intent)
-                .map { intent?.extras?.getLong(Cron::class.java.simpleName) }
-                .filter({ t -> t != 0L })
-                .flatMap { t -> cronService.get(t).toMaybe() }
-                .filter({ t -> t.status})
-                .flatMap { t ->
-                    Log.d(TAG, "Cron[${t.id}] launched at ${CronUtils.currentDateTime()}")
-                    if (t.interval > 0) {
-                        t.triggerAtTime = Calendar.getInstance().timeInMillis + t.interval
-                        cronHandler.start(t).toSingleDefault(t).toMaybe()
+    @Synchronized
+    private fun handleCron(cronId: Long) {
+        val disposable = Maybe.just(cronId)
+                .filter { it != 0L }
+                .flatMap { cronService.get(it).toMaybe() }
+                .filter { it.status }
+                .flatMap {
+                    Log.d(TAG, "Cron[${it.id}] launched at ${CronUtils.currentDateTime()}")
+                    if (it.interval > 0) {
+                        it.triggerAtTime = Calendar.getInstance().timeInMillis + it.interval
+                        cronHandler.start(it).toSingleDefault(it).toMaybe()
                     } else {
-                        Maybe.just(t)
+                        cronService.delete(it.id).toSingleDefault(it).toMaybe()
                     }
                 }
-                .subscribeWith(object: DisposableMaybeObserver<Cron>() {
+                .subscribeWith(object : DisposableMaybeObserver<Cron>() {
                     override fun onSuccess(t: Cron) {
                         onCronLaunched(t)
                         dispose()
@@ -64,8 +71,6 @@ abstract class CronProcedureService : Service() {
                         dispose()
                     }
                 })
-
-        return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder {

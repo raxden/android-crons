@@ -8,7 +8,6 @@ version = VERSION_NAME
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -25,12 +24,7 @@ android {
 dependencies {
     implementation fileTree(include: '*.jar', dir: 'libs')
 
-    implementation deps.library.implementation
-    api deps.library.api
-    kapt deps.library.kapt
-    compileOnly deps.library.compileOnly
-    testImplementation deps.library.testImplementation
-    androidTestImplementation deps.library.androidTestImplementation
+    rootProject.libDependencies.each {
+        add(it.configuration, it.dependency, it.options)
+    }
 }
-
-apply from: '../buildSystem/commons.gradle'

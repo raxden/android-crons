@@ -9,6 +9,7 @@ data class Cron(val builder: Builder) {
     var triggerAtTime: Long
     var interval: Long
     var status: Boolean
+    var data: String?
 
     init {
         id = builder.id
@@ -16,6 +17,7 @@ data class Cron(val builder: Builder) {
         triggerAtTime = builder.triggerAtTime
         interval = builder.interval
         status = builder.status
+        data = builder.data
     }
 
     class Builder(internal var id: Long = 0) {

@@ -33,7 +33,7 @@ dependencies {
 
 <dependency>
 	    <groupId>com.github.raxden</groupId>
-	    <artifactId>AndroidNavigation</artifactId>
+	    <artifactId>android-crons</artifactId>
 	    <version>{versionName}</version>
 </dependency>
 ```

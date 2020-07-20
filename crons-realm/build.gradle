@@ -9,7 +9,6 @@ version = VERSION_NAME
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -25,13 +24,8 @@ android {
 
 dependencies {
     implementation fileTree(include: '*.jar', dir: 'libs')
-    implementation project(':crons')
 
-    implementation deps.library_realm.implementation
-    api deps.library_realm.api
-    annotationProcessor deps.library_realm.annotationProcessor
-    kapt deps.library_realm.kapt
-    compileOnly deps.library_realm.compileOnly
-    testImplementation deps.library_realm.testImplementation
-    androidTestImplementation deps.library_realm.androidTestImplementation
+    rootProject.realmDependencies.each {
+        add(it.configuration, it.dependency, it.options)
+    }
 }

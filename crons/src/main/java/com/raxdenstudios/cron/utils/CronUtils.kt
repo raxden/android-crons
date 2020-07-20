@@ -5,11 +5,18 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
+import com.raxdenstudios.cron.CronHandler
+import com.raxdenstudios.cron.CronManager
 import com.raxdenstudios.cron.model.Cron
 import java.text.SimpleDateFormat
 import java.util.*
 
 object CronUtils {
+
+    private val TAG = CronUtils::class.java.simpleName
+
+    internal var isForeground: Boolean = false
 
     fun setAlarmManager(context: Context, cron: Cron) {
         cron.takeIf { it.triggerAtTime > 0 }?.apply {
@@ -47,7 +54,13 @@ object CronUtils {
             action = getPackageName(context) + ".CRON"
             putExtra(Cron::class.java.simpleName, cron.id)
         }
-        return PendingIntent.getService(context, cron.id.toInt(), intent, 0)
+        return if (!isForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG, "PendingIntent.getForegroundService....")
+            PendingIntent.getForegroundService(context, cron.id.toInt(), intent, 0)
+        } else {
+            Log.d(TAG, "PendingIntent.getService....")
+            return PendingIntent.getService(context, cron.id.toInt(), intent, 0)
+        }
     }
 
     private fun getPackageName(context: Context) = context.packageManager.getPackageInfo(context.packageName, 0).packageName
